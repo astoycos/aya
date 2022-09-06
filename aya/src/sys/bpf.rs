@@ -22,7 +22,8 @@ use std::{
 
 use crate::{
     generated::{
-        bpf_attach_type, bpf_attr, bpf_btf_info, bpf_cmd, bpf_insn, bpf_prog_info, bpf_prog_type,
+        bpf_attach_type, bpf_attr, bpf_btf_info, bpf_cmd, bpf_insn, bpf_map_info, bpf_prog_info,
+        bpf_prog_type,
     },
     maps::PerCpuValues,
     obj::{
@@ -442,17 +443,31 @@ pub(crate) fn bpf_prog_get_fd_by_id(prog_id: u32) -> Result<RawFd, io::Error> {
     }
 }
 
-pub(crate) fn bpf_obj_get_info_by_fd(prog_fd: RawFd) -> Result<bpf_prog_info, io::Error> {
+pub(crate) fn bpf_prog_get_info_by_fd(prog_fd: RawFd) -> Result<bpf_prog_info, io::Error> {
     let mut attr = unsafe { mem::zeroed::<bpf_attr>() };
-    // info gets entirely populated by the kernel
-    let info = unsafe { MaybeUninit::zeroed().assume_init() };
+    let info = MaybeUninit::zeroed();
 
     attr.info.bpf_fd = prog_fd as u32;
     attr.info.info = &info as *const _ as u64;
     attr.info.info_len = mem::size_of::<bpf_prog_info>() as u32;
 
     match sys_bpf(bpf_cmd::BPF_OBJ_GET_INFO_BY_FD, &attr) {
-        Ok(_) => Ok(info),
+        Ok(_) => Ok(unsafe { info.assume_init() }),
+        Err((_, err)) => Err(err),
+    }
+}
+
+pub(crate) fn bpf_map_get_info_by_fd(prog_fd: RawFd) -> Result<bpf_map_info, io::Error> {
+    let mut attr = unsafe { mem::zeroed::<bpf_attr>() };
+    // info gets entirely populated by the kernel
+    let info = MaybeUninit::zeroed();
+
+    attr.info.bpf_fd = prog_fd as u32;
+    attr.info.info = info.as_ptr() as *const _ as u64;
+    attr.info.info_len = mem::size_of::<bpf_map_info>() as u32;
+
+    match sys_bpf(bpf_cmd::BPF_OBJ_GET_INFO_BY_FD, &attr) {
+        Ok(_) => Ok(unsafe { info.assume_init() }),
         Err((_, err)) => Err(err),
     }
 }
