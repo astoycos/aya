@@ -403,6 +403,32 @@ impl Btf {
                 BtfType::Var(v) if !features.btf_datasec => {
                     types.types[i] = BtfType::Int(Int::new(v.name_offset, 1, IntEncoding::None, 0));
                 }
+                // Sanitize STRUCT if they are not supported 
+                BtfType::Struct(s) => {
+                    // Start DataSec Fixups 
+                    let sec_name = self.string_at(s.name_offset)?;
+                    let name = sec_name.to_string();
+                    
+                    let mut fixed_st = s.clone();
+
+                    // Handle any non C ident characters in section names
+                    // Example: "PerfEventArray<basic_node_firewall_common::packet_log>" -> 
+                    // "PerfEventArray_basic_node_firewall_common_packet_log_"
+                    let fixed_name = name
+                    .replace('<', "_")
+                    .replace('>', "_")
+                    .replace("::", "_")
+                    .replace(',',"_")
+                    .replace(' ', "_");
+
+                    if fixed_name != name {
+                        debug!{"Struct section Name was {} sanitized to {}"
+                        , name, fixed_name};
+                        fixed_st.name_offset = self.add_string(fixed_name);
+                    }
+
+                    types.types[i] = BtfType::Struct(fixed_st);
+                }
                 // Sanitize DATASEC if they are not supported
                 BtfType::DataSec(d) if !features.btf_datasec => {
                     debug!("{}: not supported. replacing with STRUCT", kind);
