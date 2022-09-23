@@ -1,13 +1,11 @@
 use std::{
     marker::PhantomData,
-    ops::{Deref, DerefMut},
     os::unix::io::{AsRawFd, RawFd},
 };
 
 use crate::{
-    generated::bpf_map_type::BPF_MAP_TYPE_SOCKHASH,
     maps::{
-        hash_map, sock::SocketMap, IterableMap, Map, MapError, MapIter, MapKeys, MapRef, MapRefMut,
+        hash_map, sock::SocketMap, IterableMap, MapError, MapIter, MapKeys, MapRef, MapRefMut, MapData,
     },
     sys::bpf_map_lookup_elem,
     Pod,
@@ -60,33 +58,25 @@ use crate::{
 /// # Ok::<(), Error>(())
 /// ```
 #[doc(alias = "BPF_MAP_TYPE_SOCKHASH")]
-pub struct SockHash<T: Deref<Target = Map>, K> {
-    inner: T,
+pub struct SockHash<K> {
+    data: MapData,
     _k: PhantomData<K>,
 }
 
-impl<T: Deref<Target = Map>, K: Pod> SockHash<T, K> {
-    pub(crate) fn new(map: T) -> Result<SockHash<T, K>, MapError> {
-        let map_type = map.obj.map_type();
-
-        // validate the map definition
-        if map_type != BPF_MAP_TYPE_SOCKHASH as u32 {
-            return Err(MapError::InvalidMapType {
-                map_type: map_type as u32,
-            });
-        }
+impl<K: Pod> SockHash<K> {
+    fn new(map: MapData) -> Result<SockHash<K>, MapError> {
         hash_map::check_kv_size::<K, u32>(&map)?;
         let _ = map.fd_or_err()?;
 
         Ok(SockHash {
-            inner: map,
+            data: map,
             _k: PhantomData,
         })
     }
 
     /// Returns the fd of the socket stored at the given key.
     pub fn get(&self, key: &K, flags: u64) -> Result<RawFd, MapError> {
-        let fd = self.inner.deref().fd_or_err()?;
+        let fd = self.data.deref().fd_or_err()?;
         let value = bpf_map_lookup_elem(fd, key, flags).map_err(|(_, io_error)| {
             MapError::SyscallError {
                 call: "bpf_map_lookup_elem".to_owned(),
@@ -105,50 +95,28 @@ impl<T: Deref<Target = Map>, K: Pod> SockHash<T, K> {
     /// An iterator visiting all keys in arbitrary order. The iterator element
     /// type is `Result<K, MapError>`.
     pub fn keys(&self) -> MapKeys<'_, K> {
-        MapKeys::new(&self.inner)
+        MapKeys::new(&self.data)
     }
-}
 
-impl<T: DerefMut<Target = Map>, K: Pod> SockHash<T, K> {
     /// Inserts a socket under the given key.
     pub fn insert<I: AsRawFd>(&mut self, key: K, value: I, flags: u64) -> Result<(), MapError> {
-        hash_map::insert(&mut self.inner, key, value.as_raw_fd(), flags)
+        hash_map::insert(&mut self.data, key, value.as_raw_fd(), flags)
     }
 
     /// Removes a socket from the map.
     pub fn remove(&mut self, key: &K) -> Result<(), MapError> {
-        hash_map::remove(&mut self.inner, key)
+        hash_map::remove(&mut self.data, key)
     }
-}
 
-impl<T: Deref<Target = Map>, K: Pod> IterableMap<K, RawFd> for SockHash<T, K> {
-    fn map(&self) -> &Map {
-        &self.inner
+    fn map(&self) -> &MapData {
+        &self.data
     }
 
     fn get(&self, key: &K) -> Result<RawFd, MapError> {
         SockHash::get(self, key, 0)
     }
-}
 
-impl<T: DerefMut<Target = Map>, K: Pod> SocketMap for SockHash<T, K> {
     fn fd_or_err(&self) -> Result<RawFd, MapError> {
-        self.inner.fd_or_err()
-    }
-}
-
-impl<K: Pod> TryFrom<MapRef> for SockHash<MapRef, K> {
-    type Error = MapError;
-
-    fn try_from(a: MapRef) -> Result<SockHash<MapRef, K>, MapError> {
-        SockHash::new(a)
-    }
-}
-
-impl<K: Pod> TryFrom<MapRefMut> for SockHash<MapRefMut, K> {
-    type Error = MapError;
-
-    fn try_from(a: MapRefMut) -> Result<SockHash<MapRefMut, K>, MapError> {
-        SockHash::new(a)
+        self.data.fd_or_err()
     }
 }

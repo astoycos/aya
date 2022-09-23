@@ -6,7 +6,7 @@ use std::{
 
 use crate::{
     generated::bpf_map_type::BPF_MAP_TYPE_PERCPU_ARRAY,
-    maps::{IterableMap, Map, MapError, MapRef, MapRefMut, PerCpuValues},
+    maps::{IterableMap, Map, MapError, MapRef, MapRefMut, PerCpuValues, MapData},
     sys::{bpf_map_lookup_elem_per_cpu, bpf_map_update_elem_per_cpu},
     Pod,
 };
@@ -50,19 +50,13 @@ use crate::{
 /// # Ok::<(), Error>(())
 /// ```
 #[doc(alias = "BPF_MAP_TYPE_PERCPU_ARRAY")]
-pub struct PerCpuArray<T: Deref<Target = Map>, V: Pod> {
-    inner: T,
+pub struct PerCpuArray<V: Pod> {
+    data: MapData,
     _v: PhantomData<V>,
 }
 
-impl<T: Deref<Target = Map>, V: Pod> PerCpuArray<T, V> {
-    fn new(map: T) -> Result<PerCpuArray<T, V>, MapError> {
-        let map_type = map.obj.map_type();
-        if map_type != BPF_MAP_TYPE_PERCPU_ARRAY as u32 {
-            return Err(MapError::InvalidMapType {
-                map_type: map_type as u32,
-            });
-        }
+impl<V: Pod> PerCpuArray<V> {
+    fn new(map: MapData) -> Result<PerCpuArray<V>, MapError> {
         let expected = mem::size_of::<u32>();
         let size = map.obj.key_size() as usize;
         if size != expected {
@@ -77,7 +71,7 @@ impl<T: Deref<Target = Map>, V: Pod> PerCpuArray<T, V> {
         let _fd = map.fd_or_err()?;
 
         Ok(PerCpuArray {
-            inner: map,
+            data: map,
             _v: PhantomData,
         })
     }
@@ -86,7 +80,7 @@ impl<T: Deref<Target = Map>, V: Pod> PerCpuArray<T, V> {
     ///
     /// This corresponds to the value of `bpf_map_def::max_entries` on the eBPF side.
     pub fn len(&self) -> u32 {
-        self.inner.obj.max_entries()
+        self.data.obj.max_entries()
     }
 
     /// Returns a slice of values - one for each CPU - stored at the given index.
@@ -97,7 +91,7 @@ impl<T: Deref<Target = Map>, V: Pod> PerCpuArray<T, V> {
     /// if `bpf_map_lookup_elem` fails.
     pub fn get(&self, index: &u32, flags: u64) -> Result<PerCpuValues<V>, MapError> {
         self.check_bounds(*index)?;
-        let fd = self.inner.fd_or_err()?;
+        let fd = self.data.fd_or_err()?;
 
         let value = bpf_map_lookup_elem_per_cpu(fd, index, flags).map_err(|(_, io_error)| {
             MapError::SyscallError {
@@ -115,16 +109,14 @@ impl<T: Deref<Target = Map>, V: Pod> PerCpuArray<T, V> {
     }
 
     fn check_bounds(&self, index: u32) -> Result<(), MapError> {
-        let max_entries = self.inner.obj.max_entries();
-        if index >= self.inner.obj.max_entries() {
+        let max_entries = self.data.obj.max_entries();
+        if index >= self.data.obj.max_entries() {
             Err(MapError::OutOfBounds { index, max_entries })
         } else {
             Ok(())
         }
     }
-}
 
-impl<T: Deref<Target = Map> + DerefMut<Target = Map>, V: Pod> PerCpuArray<T, V> {
     /// Sets the values - one for each CPU - at the given index.
     ///
     /// # Errors
@@ -132,7 +124,7 @@ impl<T: Deref<Target = Map> + DerefMut<Target = Map>, V: Pod> PerCpuArray<T, V> 
     /// Returns [`MapError::OutOfBounds`] if `index` is out of bounds, [`MapError::SyscallError`]
     /// if `bpf_map_update_elem` fails.
     pub fn set(&mut self, index: u32, values: PerCpuValues<V>, flags: u64) -> Result<(), MapError> {
-        let fd = self.inner.fd_or_err()?;
+        let fd = self.data.fd_or_err()?;
         self.check_bounds(index)?;
         bpf_map_update_elem_per_cpu(fd, &index, &values, flags).map_err(|(_, io_error)| {
             MapError::SyscallError {
@@ -142,30 +134,12 @@ impl<T: Deref<Target = Map> + DerefMut<Target = Map>, V: Pod> PerCpuArray<T, V> 
         })?;
         Ok(())
     }
-}
 
-impl<T: Deref<Target = Map>, V: Pod> IterableMap<u32, PerCpuValues<V>> for PerCpuArray<T, V> {
-    fn map(&self) -> &Map {
-        &self.inner
+    fn map(&self) -> &MapData {
+        &self.data
     }
 
     fn get(&self, index: &u32) -> Result<PerCpuValues<V>, MapError> {
         self.get(index, 0)
-    }
-}
-
-impl<V: Pod> TryFrom<MapRef> for PerCpuArray<MapRef, V> {
-    type Error = MapError;
-
-    fn try_from(a: MapRef) -> Result<PerCpuArray<MapRef, V>, MapError> {
-        PerCpuArray::new(a)
-    }
-}
-
-impl<V: Pod> TryFrom<MapRefMut> for PerCpuArray<MapRefMut, V> {
-    type Error = MapError;
-
-    fn try_from(a: MapRefMut) -> Result<PerCpuArray<MapRefMut, V>, MapError> {
-        PerCpuArray::new(a)
     }
 }

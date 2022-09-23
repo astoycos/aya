@@ -5,7 +5,7 @@ use std::{
 
 use crate::{
     generated::bpf_map_type::{BPF_MAP_TYPE_HASH, BPF_MAP_TYPE_LRU_HASH},
-    maps::{hash_map, IterableMap, Map, MapError, MapIter, MapKeys, MapRef, MapRefMut},
+    maps::{hash_map, IterableMap, Map, MapError, MapIter, MapKeys, MapRef, MapRefMut, MapData},
     sys::bpf_map_lookup_elem,
     Pod,
 };
@@ -32,27 +32,19 @@ use crate::{
 /// ```
 #[doc(alias = "BPF_MAP_TYPE_HASH")]
 #[doc(alias = "BPF_MAP_TYPE_LRU_HASH")]
-pub struct HashMap<T: Deref<Target = Map>, K, V> {
-    inner: T,
+pub struct HashMap<K, V> {
+    data: MapData,
     _k: PhantomData<K>,
     _v: PhantomData<V>,
 }
 
-impl<T: Deref<Target = Map>, K: Pod, V: Pod> HashMap<T, K, V> {
-    pub(crate) fn new(map: T) -> Result<HashMap<T, K, V>, MapError> {
-        let map_type = map.obj.map_type();
-
-        // validate the map definition
-        if map_type != BPF_MAP_TYPE_HASH as u32 && map_type != BPF_MAP_TYPE_LRU_HASH as u32 {
-            return Err(MapError::InvalidMapType {
-                map_type: map_type as u32,
-            });
-        }
+impl<K: Pod, V: Pod> HashMap<K, V> {
+    fn new(map: MapData) -> Result<HashMap<K, V>, MapError> {
         hash_map::check_kv_size::<K, V>(&map)?;
         let _ = map.fd_or_err()?;
 
         Ok(HashMap {
-            inner: map,
+            data: map,
             _k: PhantomData,
             _v: PhantomData,
         })
@@ -60,7 +52,7 @@ impl<T: Deref<Target = Map>, K: Pod, V: Pod> HashMap<T, K, V> {
 
     /// Returns a copy of the value associated with the key.
     pub fn get(&self, key: &K, flags: u64) -> Result<V, MapError> {
-        let fd = self.inner.deref().fd_or_err()?;
+        let fd = self.data.deref().fd_or_err()?;
         let value = bpf_map_lookup_elem(fd, key, flags).map_err(|(_, io_error)| {
             MapError::SyscallError {
                 call: "bpf_map_lookup_elem".to_owned(),
@@ -79,61 +71,25 @@ impl<T: Deref<Target = Map>, K: Pod, V: Pod> HashMap<T, K, V> {
     /// An iterator visiting all keys in arbitrary order. The iterator element
     /// type is `Result<K, MapError>`.
     pub fn keys(&self) -> MapKeys<'_, K> {
-        MapKeys::new(&self.inner)
+        MapKeys::new(&self.data)
     }
-}
 
-impl<T: DerefMut<Target = Map>, K: Pod, V: Pod> HashMap<T, K, V> {
     /// Inserts a key-value pair into the map.
     pub fn insert(&mut self, key: K, value: V, flags: u64) -> Result<(), MapError> {
-        hash_map::insert(&mut self.inner, key, value, flags)
+    hash_map::insert(&mut self.data, key, value, flags)
     }
 
     /// Removes a key from the map.
     pub fn remove(&mut self, key: &K) -> Result<(), MapError> {
-        hash_map::remove(&mut self.inner, key)
+        hash_map::remove(&mut self.data, key)
     }
-}
 
-impl<T: Deref<Target = Map>, K: Pod, V: Pod> IterableMap<K, V> for HashMap<T, K, V> {
-    fn map(&self) -> &Map {
-        &self.inner
+    fn map(&self) -> &MapData {
+        &self.data
     }
 
     fn get(&self, key: &K) -> Result<V, MapError> {
         HashMap::get(self, key, 0)
-    }
-}
-
-impl<K: Pod, V: Pod> TryFrom<MapRef> for HashMap<MapRef, K, V> {
-    type Error = MapError;
-
-    fn try_from(a: MapRef) -> Result<HashMap<MapRef, K, V>, MapError> {
-        HashMap::new(a)
-    }
-}
-
-impl<K: Pod, V: Pod> TryFrom<MapRefMut> for HashMap<MapRefMut, K, V> {
-    type Error = MapError;
-
-    fn try_from(a: MapRefMut) -> Result<HashMap<MapRefMut, K, V>, MapError> {
-        HashMap::new(a)
-    }
-}
-
-impl<'a, K: Pod, V: Pod> TryFrom<&'a Map> for HashMap<&'a Map, K, V> {
-    type Error = MapError;
-
-    fn try_from(a: &'a Map) -> Result<HashMap<&'a Map, K, V>, MapError> {
-        HashMap::new(a)
-    }
-}
-
-impl<'a, K: Pod, V: Pod> TryFrom<&'a mut Map> for HashMap<&'a mut Map, K, V> {
-    type Error = MapError;
-
-    fn try_from(a: &'a mut Map) -> Result<HashMap<&'a mut Map, K, V>, MapError> {
-        HashMap::new(a)
     }
 }
 

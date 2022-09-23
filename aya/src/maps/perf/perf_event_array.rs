@@ -2,7 +2,6 @@
 //!
 //! [`perf`]: https://perf.wiki.kernel.org/index.php/Main_Page.
 use std::{
-    ops::DerefMut,
     os::unix::io::{AsRawFd, RawFd},
     sync::Arc,
 };
@@ -10,10 +9,9 @@ use std::{
 use bytes::BytesMut;
 
 use crate::{
-    generated::bpf_map_type::BPF_MAP_TYPE_PERF_EVENT_ARRAY,
     maps::{
         perf::{Events, PerfBuffer, PerfBufferError},
-        Map, MapError, MapRefMut,
+        MapError, MapData,
     },
     sys::bpf_map_update_elem,
     util::page_size,
@@ -26,12 +24,12 @@ use crate::{
 ///
 /// See the [`PerfEventArray` documentation](PerfEventArray) for an overview of how to use
 /// perf buffers.
-pub struct PerfEventArrayBuffer<T: DerefMut<Target = Map>> {
-    _map: Arc<T>,
+pub struct PerfEventArrayBuffer {
+    data: Arc<MapData>,
     buf: PerfBuffer,
 }
 
-impl<T: DerefMut<Target = Map>> PerfEventArrayBuffer<T> {
+impl PerfEventArrayBuffer {
     /// Returns true if the buffer contains events that haven't been read.
     pub fn readable(&self) -> bool {
         self.buf.readable()
@@ -53,9 +51,7 @@ impl<T: DerefMut<Target = Map>> PerfEventArrayBuffer<T> {
     pub fn read_events(&mut self, out_bufs: &mut [BytesMut]) -> Result<Events, PerfBufferError> {
         self.buf.read_events(out_bufs)
     }
-}
 
-impl<T: DerefMut<Target = Map>> AsRawFd for PerfEventArrayBuffer<T> {
     fn as_raw_fd(&self) -> RawFd {
         self.buf.as_raw_fd()
     }
@@ -155,23 +151,17 @@ impl<T: DerefMut<Target = Map>> AsRawFd for PerfEventArrayBuffer<T> {
 /// [tokio]: https://docs.rs/tokio
 /// [async-std]: https://docs.rs/async-std
 #[doc(alias = "BPF_MAP_TYPE_PERF_EVENT_ARRAY")]
-pub struct PerfEventArray<T: DerefMut<Target = Map>> {
-    map: Arc<T>,
+pub struct PerfEventArray {
+    data: Arc<MapData>,
     page_size: usize,
 }
 
-impl<T: DerefMut<Target = Map>> PerfEventArray<T> {
-    pub(crate) fn new(map: T) -> Result<PerfEventArray<T>, MapError> {
-        let map_type = map.obj.map_type();
-        if map_type != BPF_MAP_TYPE_PERF_EVENT_ARRAY as u32 {
-            return Err(MapError::InvalidMapType {
-                map_type: map_type as u32,
-            });
-        }
+impl PerfEventArray {
+    pub(crate) fn new(map: MapData) -> Result<PerfEventArray, MapError> {
         let _fd = map.fd_or_err()?;
 
         Ok(PerfEventArray {
-            map: Arc::new(map),
+            data: Arc::new(map),
             page_size: page_size(),
         })
     }
@@ -183,7 +173,7 @@ impl<T: DerefMut<Target = Map>> PerfEventArray<T> {
         &mut self,
         index: u32,
         page_count: Option<usize>,
-    ) -> Result<PerfEventArrayBuffer<T>, PerfBufferError> {
+    ) -> Result<PerfEventArrayBuffer, PerfBufferError> {
         // FIXME: keep track of open buffers
 
         // this cannot fail as new() checks that the fd is open
@@ -194,15 +184,7 @@ impl<T: DerefMut<Target = Map>> PerfEventArray<T> {
 
         Ok(PerfEventArrayBuffer {
             buf,
-            _map: self.map.clone(),
+            data: self.data.clone(),
         })
-    }
-}
-
-impl TryFrom<MapRefMut> for PerfEventArray<MapRefMut> {
-    type Error = MapError;
-
-    fn try_from(a: MapRefMut) -> Result<PerfEventArray<MapRefMut>, MapError> {
-        PerfEventArray::new(a)
     }
 }

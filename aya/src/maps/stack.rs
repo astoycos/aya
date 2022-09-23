@@ -7,10 +7,12 @@ use std::{
 
 use crate::{
     generated::bpf_map_type::BPF_MAP_TYPE_STACK,
-    maps::{Map, MapError, MapRef, MapRefMut},
+    maps::{Map, MapError},
     sys::{bpf_map_lookup_and_delete_elem, bpf_map_update_elem},
     Pod,
 };
+
+use super::MapData;
 
 /// A LIFO stack.
 ///
@@ -30,13 +32,13 @@ use crate::{
 /// # Ok::<(), aya::BpfError>(())
 /// ```
 #[doc(alias = "BPF_MAP_TYPE_STACK")]
-pub struct Stack<T: Deref<Target = Map>, V: Pod> {
-    inner: T,
+pub struct Stack<V: Pod> {
+    data: MapData,
     _v: PhantomData<V>,
 }
 
-impl<T: Deref<Target = Map>, V: Pod> Stack<T, V> {
-    fn new(map: T) -> Result<Stack<T, V>, MapError> {
+impl<V: Pod> Stack<V> {
+    fn new(map: MapData) -> Result<Stack<V>, MapError> {
         let map_type = map.obj.map_type();
         if map_type != BPF_MAP_TYPE_STACK as u32 {
             return Err(MapError::InvalidMapType {
@@ -57,7 +59,7 @@ impl<T: Deref<Target = Map>, V: Pod> Stack<T, V> {
         let _fd = map.fd_or_err()?;
 
         Ok(Stack {
-            inner: map,
+            data: map,
             _v: PhantomData,
         })
     }
@@ -66,7 +68,7 @@ impl<T: Deref<Target = Map>, V: Pod> Stack<T, V> {
     ///
     /// This corresponds to the value of `bpf_map_def::max_entries` on the eBPF side.
     pub fn capacity(&self) -> u32 {
-        self.inner.obj.max_entries()
+        self.data.obj.max_entries()
     }
 }
 
@@ -78,7 +80,7 @@ impl<T: Deref<Target = Map> + DerefMut<Target = Map>, V: Pod> Stack<T, V> {
     /// Returns [`MapError::ElementNotFound`] if the stack is empty, [`MapError::SyscallError`]
     /// if `bpf_map_lookup_and_delete_elem` fails.
     pub fn pop(&mut self, flags: u64) -> Result<V, MapError> {
-        let fd = self.inner.fd_or_err()?;
+        let fd = self.data.fd_or_err()?;
 
         let value = bpf_map_lookup_and_delete_elem::<u32, _>(fd, None, flags).map_err(
             |(_, io_error)| MapError::SyscallError {
@@ -95,7 +97,7 @@ impl<T: Deref<Target = Map> + DerefMut<Target = Map>, V: Pod> Stack<T, V> {
     ///
     /// [`MapError::SyscallError`] if `bpf_map_update_elem` fails.
     pub fn push(&mut self, value: V, flags: u64) -> Result<(), MapError> {
-        let fd = self.inner.fd_or_err()?;
+        let fd = self.data.fd_or_err()?;
         bpf_map_update_elem(fd, None::<&u32>, &value, flags).map_err(|(_, io_error)| {
             MapError::SyscallError {
                 call: "bpf_map_update_elem".to_owned(),

@@ -58,8 +58,6 @@ use crate::{
     PinningType, Pod,
 };
 
-mod map_lock;
-
 pub mod array;
 pub mod bloom_filter;
 pub mod hash_map;
@@ -72,7 +70,6 @@ pub mod stack_trace;
 
 pub use array::{Array, PerCpuArray, ProgramArray};
 pub use hash_map::{HashMap, PerCpuHashMap};
-pub use map_lock::*;
 pub use perf::PerfEventArray;
 pub use queue::Queue;
 pub use sock::{SockHash, SockMap};
@@ -243,11 +240,38 @@ fn maybe_warn_rlimit() {
     }
 }
 
+/// eBPF map types.
+#[derive(Debug)]
+pub enum Map<K: Pod, V: Pod> {
+    /// A ['Array`] map
+    Array(Array<V>),
+    /// A [`PerCpuArray`] map
+    PerCpuArray(PerCpuArray<V>),
+    /// A [`ProgramArray`] map 
+    ProgramArray(ProgramArray),
+    /// A [`HashMap`] map
+    HashMap(HashMap<K,V>),
+    /// A ['PerCpuHashMap'] map
+    PerCpuHashMap(PerCpuHashMap<K,V>),
+    /// A [`PerfEventArray`] map
+    PerfEventArray(PerfEventArray),
+    /// A [`AsyncPerfEventArray`] map
+    AsyncPerfEventArray(AsyncPerfEventArray),
+    /// A [`SockMap`] map
+    SockMap(SockMap),
+    /// A [`SockHash`] map
+    SockHash(SockHash),
+    /// A [`BloomFilter`] map
+    BloomFilter(BloomFilter),
+    /// A [`LpmTrie`] map
+    LpmTrie(LpmTrie),
+}
+
 /// A generic handle to a BPF map.
 ///
 /// You should never need to use this unless you're implementing a new map type.
 #[derive(Debug)]
-pub struct Map {
+pub struct MapData {
     pub(crate) obj: obj::Map,
     pub(crate) fd: Option<RawFd>,
     pub(crate) btf_fd: Option<RawFd>,
@@ -255,7 +279,7 @@ pub struct Map {
     pub pinned: bool,
 }
 
-impl Map {
+impl MapData {
     /// Creates a new map with the provided `name`
     pub fn create(&mut self, name: &str) -> Result<RawFd, MapError> {
         if self.fd.is_some() {

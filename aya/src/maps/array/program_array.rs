@@ -2,13 +2,11 @@
 
 use std::{
     mem,
-    ops::{Deref, DerefMut},
     os::unix::prelude::{AsRawFd, RawFd},
 };
 
 use crate::{
-    generated::bpf_map_type::BPF_MAP_TYPE_PROG_ARRAY,
-    maps::{Map, MapError, MapKeys, MapRef, MapRefMut},
+    maps::{MapError, MapKeys, MapData},
     programs::ProgramFd,
     sys::{bpf_map_delete_elem, bpf_map_update_elem},
 };
@@ -49,18 +47,12 @@ use crate::{
 /// # Ok::<(), aya::BpfError>(())
 /// ```
 #[doc(alias = "BPF_MAP_TYPE_PROG_ARRAY")]
-pub struct ProgramArray<T: Deref<Target = Map>> {
-    inner: T,
+pub struct ProgramArray {
+    data: MapData,
 }
 
-impl<T: Deref<Target = Map>> ProgramArray<T> {
-    fn new(map: T) -> Result<ProgramArray<T>, MapError> {
-        let map_type = map.obj.map_type();
-        if map_type != BPF_MAP_TYPE_PROG_ARRAY as u32 {
-            return Err(MapError::InvalidMapType {
-                map_type: map_type as u32,
-            });
-        }
+impl ProgramArray {
+    fn new(map: MapData) -> Result<ProgramArray, MapError> {
         let expected = mem::size_of::<u32>();
         let size = map.obj.key_size() as usize;
         if size != expected {
@@ -74,32 +66,30 @@ impl<T: Deref<Target = Map>> ProgramArray<T> {
         }
         let _fd = map.fd_or_err()?;
 
-        Ok(ProgramArray { inner: map })
+        Ok(ProgramArray { data: map })
     }
 
     /// An iterator over the indices of the array that point to a program. The iterator item type
     /// is `Result<u32, MapError>`.
     pub fn indices(&self) -> MapKeys<'_, u32> {
-        MapKeys::new(&self.inner)
+        MapKeys::new(&self.data)
     }
 
     fn check_bounds(&self, index: u32) -> Result<(), MapError> {
-        let max_entries = self.inner.obj.max_entries();
-        if index >= self.inner.obj.max_entries() {
+        let max_entries = self.data.obj.max_entries();
+        if index >= self.data.obj.max_entries() {
             Err(MapError::OutOfBounds { index, max_entries })
         } else {
             Ok(())
         }
     }
-}
 
-impl<T: Deref<Target = Map> + DerefMut<Target = Map>> ProgramArray<T> {
     /// Sets the target program file descriptor for the given index in the jump table.
     ///
     /// When an eBPF program calls `bpf_tail_call(ctx, prog_array, index)`, control
     /// flow will jump to `program`.
     pub fn set(&mut self, index: u32, program: ProgramFd, flags: u64) -> Result<(), MapError> {
-        let fd = self.inner.fd_or_err()?;
+        let fd = self.data.fd_or_err()?;
         self.check_bounds(index)?;
         let prog_fd = program.as_raw_fd();
 
@@ -117,7 +107,7 @@ impl<T: Deref<Target = Map> + DerefMut<Target = Map>> ProgramArray<T> {
     /// Calling `bpf_tail_call(ctx, prog_array, index)` on an index that has been cleared returns an
     /// error.
     pub fn clear_index(&mut self, index: &u32) -> Result<(), MapError> {
-        let fd = self.inner.fd_or_err()?;
+        let fd = self.data.fd_or_err()?;
         self.check_bounds(*index)?;
         bpf_map_delete_elem(fd, index)
             .map(|_| ())
@@ -125,21 +115,5 @@ impl<T: Deref<Target = Map> + DerefMut<Target = Map>> ProgramArray<T> {
                 call: "bpf_map_delete_elem".to_owned(),
                 io_error,
             })
-    }
-}
-
-impl TryFrom<MapRef> for ProgramArray<MapRef> {
-    type Error = MapError;
-
-    fn try_from(a: MapRef) -> Result<ProgramArray<MapRef>, MapError> {
-        ProgramArray::new(a)
-    }
-}
-
-impl TryFrom<MapRefMut> for ProgramArray<MapRefMut> {
-    type Error = MapError;
-
-    fn try_from(a: MapRefMut) -> Result<ProgramArray<MapRefMut>, MapError> {
-        ProgramArray::new(a)
     }
 }

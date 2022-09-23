@@ -10,6 +10,8 @@ use crate::{
     Pod,
 };
 
+use super::MapData;
+
 /// A Bloom Filter.
 ///
 /// # Minimum kernel version
@@ -33,22 +35,13 @@ use crate::{
 /// ```
 
 #[doc(alias = "BPF_MAP_TYPE_BLOOM_FILTER")]
-pub struct BloomFilter<T: Deref<Target = Map>, V: Pod> {
-    inner: T,
+pub struct BloomFilter<V: Pod> {
+    data: MapData,
     _v: PhantomData<V>,
 }
 
-impl<T: Deref<Target = Map>, V: Pod> BloomFilter<T, V> {
-    pub(crate) fn new(map: T) -> Result<BloomFilter<T, V>, MapError> {
-        let map_type = map.obj.map_type();
-
-        // validate the map definition
-        if map_type != BPF_MAP_TYPE_BLOOM_FILTER as u32 {
-            return Err(MapError::InvalidMapType {
-                map_type: map_type as u32,
-            });
-        }
-
+impl<V: Pod> BloomFilter<V> {
+    pub(crate) fn new(map: MapData) -> Result<BloomFilter<V>, MapError> {
         let size = mem::size_of::<V>();
         let expected = map.obj.value_size() as usize;
         if size != expected {
@@ -58,14 +51,14 @@ impl<T: Deref<Target = Map>, V: Pod> BloomFilter<T, V> {
         let _ = map.fd_or_err()?;
 
         Ok(BloomFilter {
-            inner: map,
+            data: map,
             _v: PhantomData,
         })
     }
 
     /// Query the existence of the element.
     pub fn contains(&self, mut value: &V, flags: u64) -> Result<(), MapError> {
-        let fd = self.inner.deref().fd_or_err()?;
+        let fd = self.data.deref().fd_or_err()?;
 
         bpf_map_lookup_elem_ptr::<u32, _>(fd, None, &mut value, flags)
             .map_err(|(_, io_error)| MapError::SyscallError {
@@ -78,44 +71,12 @@ impl<T: Deref<Target = Map>, V: Pod> BloomFilter<T, V> {
 
     /// Inserts a value into the map.
     pub fn insert(&self, value: V, flags: u64) -> Result<(), MapError> {
-        let fd = self.inner.deref().fd_or_err()?;
+        let fd = self.data.deref().fd_or_err()?;
         bpf_map_push_elem(fd, &value, flags).map_err(|(_, io_error)| MapError::SyscallError {
             call: "bpf_map_push_elem".to_owned(),
             io_error,
         })?;
         Ok(())
-    }
-}
-
-impl<V: Pod> TryFrom<MapRef> for BloomFilter<MapRef, V> {
-    type Error = MapError;
-
-    fn try_from(a: MapRef) -> Result<BloomFilter<MapRef, V>, MapError> {
-        BloomFilter::new(a)
-    }
-}
-
-impl<V: Pod> TryFrom<MapRefMut> for BloomFilter<MapRefMut, V> {
-    type Error = MapError;
-
-    fn try_from(a: MapRefMut) -> Result<BloomFilter<MapRefMut, V>, MapError> {
-        BloomFilter::new(a)
-    }
-}
-
-impl<'a, V: Pod> TryFrom<&'a Map> for BloomFilter<&'a Map, V> {
-    type Error = MapError;
-
-    fn try_from(a: &'a Map) -> Result<BloomFilter<&'a Map, V>, MapError> {
-        BloomFilter::new(a)
-    }
-}
-
-impl<'a, V: Pod> TryFrom<&'a mut Map> for BloomFilter<&'a mut Map, V> {
-    type Error = MapError;
-
-    fn try_from(a: &'a mut Map) -> Result<BloomFilter<&'a mut Map, V>, MapError> {
-        BloomFilter::new(a)
     }
 }
 

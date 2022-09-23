@@ -16,7 +16,7 @@ use crate::{
         bpf_map_type::BPF_MAP_TYPE_PERF_EVENT_ARRAY, AYA_PERF_EVENT_IOC_DISABLE,
         AYA_PERF_EVENT_IOC_ENABLE, AYA_PERF_EVENT_IOC_SET_BPF,
     },
-    maps::{Map, MapError, MapLock, MapRef, MapRefMut},
+    maps::{Map, MapError, MapData},
     obj::{
         btf::{Btf, BtfError},
         MapKind, Object, ParseError, ProgramSection,
@@ -26,6 +26,10 @@ use crate::{
         CgroupSysctl, Extension, FEntry, FExit, KProbe, LircMode2, Lsm, PerfEvent, ProbeKind,
         Program, ProgramData, ProgramError, RawTracePoint, SchedClassifier, SkLookup, SkMsg, SkSkb,
         SkSkbKind, SockOps, SocketFilter, TracePoint, UProbe, Xdp,
+    },
+    maps::{
+        Array,PerCpuArray,ProgramArray, HashMap as AyaHashMap, PerCpuHashMap, PerfEventArray,
+        bloom_filter::BloomFilter, SockHash, SockMap, lpm_trie::LpmTrie, Stack, stack_trace::StackTrace
     },
     sys::{
         bpf_load_btf, bpf_map_freeze, bpf_map_update_elem_ptr, is_btf_datasec_supported,
@@ -451,7 +455,7 @@ impl<'a> BpfLoader<'a> {
                     }
                 }
             }
-            let mut map = Map {
+            let mut map = MapData {
                 obj,
                 fd: None,
                 pinned: false,
@@ -640,7 +644,31 @@ impl<'a> BpfLoader<'a> {
             .collect();
         let maps = maps
             .drain()
-            .map(|(name, map)| (name, MapLock::new(map)))
+            .map(|(name, map)| {
+                let map_type = map.map_type()?;
+
+                match map_type { 
+                    BPF_MAP_TYPE_ARRAY => Map::Array(Array::new(map)),
+                    BPF_MAP_TYPE_PERCPU_ARRAY => Map::PerCpuArray(PerCpuArray::new(map)),
+                    BPF_MAP_TYPE_PROGRAM_ARRAY => Map::ProgramArray(ProgramArray::new(map)),
+                    BPF_MAP_TYPE_HASHMAP => Map::HashMap(AyaHashMap::new(map)),
+                    BPF_MAP_TYPE_PERCPU_HASH => Map::PerCpuHashMap(PerCpuHashMap::new(map)),
+                    BPF_MAP_TYPE_PERF_EVENT_ARRAY => Map::PerfEventArray(PerfEventArray::new(map)),
+                    BPF_MAP_TYPE_SOCKHASH => Map::SockHash(SockHash::new(map)), 
+                    BPF_MAP_TYPE_SOCKMAP => Map::SockMap(SockMap::new(map)),
+                    BPF_MAP_TYPE_BLOOM_FILTER => Map::BloomFilter(BloomFilter::new(map)),
+                    BPF_MAP_TYPE_LPM_TRIE => Map::LpmTrie(LpmTrie::new(map)),
+                    BPF_MAP_TYPE_STACK => Map::Stack(Stack::new(map)),
+
+
+
+
+
+
+
+
+                }   
+            })
             .collect();
         Ok(Bpf { maps, programs })
     }
