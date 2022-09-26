@@ -29,13 +29,12 @@ use crate::{
 /// # Ok::<(), aya::BpfError>(())
 /// ```
 #[doc(alias = "BPF_MAP_TYPE_ARRAY")]
-pub struct Array<V: Pod> {
+pub struct Array {
     pub(crate) data: MapData,
-    pub(crate) _v: PhantomData<V>,
 }
 
-impl<V: Pod> Array<V> {
-    fn new(map: MapData) -> Result<Array<V>, MapError> {
+impl Array {
+    fn new(map: MapData) -> Result<Array, MapError> {
         let expected = mem::size_of::<u32>();
         let size = map.obj.key_size() as usize;
         if size != expected {
@@ -116,9 +115,5 @@ impl<V: Pod> Array<V> {
 
     fn map(&self) -> &MapData {
         &self.data
-    }
-
-    fn get(&self, index: &u32) -> Result<V, MapError> {
-        self.get(index, 0)
     }
 }

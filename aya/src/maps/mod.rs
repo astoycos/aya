@@ -75,6 +75,8 @@ pub use queue::Queue;
 pub use sock::{SockHash, SockMap};
 pub use stack::Stack;
 pub use stack_trace::StackTraceMap;
+pub use bloom_filter::BloomFilter; 
+pub use lpm_trie::LpmTrie;
 
 #[derive(Error, Debug)]
 /// Errors occuring from working with Maps
@@ -242,44 +244,50 @@ fn maybe_warn_rlimit() {
 
 /// eBPF map types.
 #[derive(Debug)]
-pub enum Map<K: Pod, V: Pod> {
+pub enum Map {
     /// A ['Array`] map
-    Array(Array<V>),
+    Array(Array),
     /// A [`PerCpuArray`] map
-    PerCpuArray(PerCpuArray<V>),
+    PerCpuArray(PerCpuArray<dyn Pod>),
     /// A [`ProgramArray`] map 
     ProgramArray(ProgramArray),
     /// A [`HashMap`] map
-    HashMap(HashMap<K,V>),
+    HashMap(HashMap<dyn Pod, dyn Pod>),
     /// A ['PerCpuHashMap'] map
-    PerCpuHashMap(PerCpuHashMap<K,V>),
+    PerCpuHashMap(PerCpuHashMap<dyn Pod, dyn Pod>),
     /// A [`PerfEventArray`] map
     PerfEventArray(PerfEventArray),
     /// A [`AsyncPerfEventArray`] map
-    AsyncPerfEventArray(AsyncPerfEventArray),
     /// A [`SockMap`] map
     SockMap(SockMap),
     /// A [`SockHash`] map
-    SockHash(SockHash),
+    SockHash(SockHash<dyn Pod>),
     /// A [`BloomFilter`] map
-    BloomFilter(BloomFilter),
+    BloomFilter(BloomFilter<dyn Pod>),
     /// A [`LpmTrie`] map
-    LpmTrie(LpmTrie),
+    LpmTrie(LpmTrie<dyn Pod, dyn Pod>),
+    /// A [`Stack`] map
+    Stack(Stack<dyn Pod>),
+    /// A [`StackTrace`] map
+    StackTrace(StackTraceMap),
+    /// A [`Queue`] map
+    Queue(Queue<dyn Pod>), 
 }
 
 /// A generic handle to a BPF map.
 ///
 /// You should never need to use this unless you're implementing a new map type.
 #[derive(Debug)]
-pub struct MapData {
+pub struct MapData<V: Pod> {
     pub(crate) obj: obj::Map,
     pub(crate) fd: Option<RawFd>,
     pub(crate) btf_fd: Option<RawFd>,
+    pub(crate) _v: PhantomData<V>,
     /// Indicates if this map has been pinned to bpffs
     pub pinned: bool,
 }
 
-impl MapData {
+impl<V: Pod> MapData<V> {
     /// Creates a new map with the provided `name`
     pub fn create(&mut self, name: &str) -> Result<RawFd, MapError> {
         if self.fd.is_some() {

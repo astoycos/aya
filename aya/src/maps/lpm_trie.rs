@@ -2,8 +2,7 @@
 use std::{marker::PhantomData, mem, ops::Deref};
 
 use crate::{
-    generated::bpf_map_type::BPF_MAP_TYPE_LPM_TRIE,
-    maps::{IterableMap, Map, MapError, MapRef, MapRefMut},
+    maps::{IterableMap, Map, MapError},
     sys::{bpf_map_delete_elem, bpf_map_lookup_elem, bpf_map_update_elem},
     Pod,
 };
@@ -122,8 +121,9 @@ impl<K: Pod, V: Pod> LpmTrie<K, V> {
 
     /// Returns a copy of the value associated with the longest prefix matching key in the LpmTrie.
     pub fn get(&self, key: &Key<K>, flags: u64) -> Result<V, MapError> {
+        let lookup = Key::new(mem::size_of::<K>() as u32, *key);
         let fd = self.data.deref().fd_or_err()?;
-        let value = bpf_map_lookup_elem(fd, key, flags).map_err(|(_, io_error)| {
+        let value = bpf_map_lookup_elem(fd, &lookup, flags).map_err(|(_, io_error)| {
             MapError::SyscallError {
                 call: "bpf_map_lookup_elem".to_owned(),
                 io_error,
@@ -158,15 +158,12 @@ impl<K: Pod, V: Pod> LpmTrie<K, V> {
             })
     }
 
-    fn map(&self) -> &MapData {
+    fn map(&self) -> &Map {
         &self.data
     }
 
-    fn get(&self, key: &K) -> Result<V, MapError> {
-        let lookup = Key::new(mem::size_of::<K>() as u32, *key);
-        self.get(&lookup, 0)
-    }
 }
+
 
 #[cfg(test)]
 mod tests {

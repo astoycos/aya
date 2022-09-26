@@ -1,11 +1,9 @@
 use std::{
     marker::PhantomData,
-    ops::{Deref, DerefMut},
 };
 
 use crate::{
-    generated::bpf_map_type::{BPF_MAP_TYPE_HASH, BPF_MAP_TYPE_LRU_HASH},
-    maps::{hash_map, IterableMap, Map, MapError, MapIter, MapKeys, MapRef, MapRefMut, MapData},
+    maps::{hash_map, IterableMap, MapError, MapIter, MapKeys, MapData},
     sys::bpf_map_lookup_elem,
     Pod,
 };
@@ -83,7 +81,9 @@ impl<K: Pod, V: Pod> HashMap<K, V> {
     pub fn remove(&mut self, key: &K) -> Result<(), MapError> {
         hash_map::remove(&mut self.data, key)
     }
+}
 
+impl<K: Pod, V: Pod> IterableMap<K, V> for HashMap<K, V> {
     fn map(&self) -> &MapData {
         &self.data
     }

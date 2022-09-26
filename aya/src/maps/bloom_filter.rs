@@ -4,8 +4,7 @@ use std::{marker::PhantomData, ops::Deref};
 use core::mem;
 
 use crate::{
-    generated::bpf_map_type::BPF_MAP_TYPE_BLOOM_FILTER,
-    maps::{Map, MapError, MapRef, MapRefMut},
+    maps::MapError,
     sys::{bpf_map_lookup_elem_ptr, bpf_map_push_elem},
     Pod,
 };

@@ -1,13 +1,11 @@
 //! Per-CPU hash map.
 use std::{
     marker::PhantomData,
-    ops::{Deref, DerefMut},
 };
 
 use crate::{
-    generated::bpf_map_type::{BPF_MAP_TYPE_LRU_PERCPU_HASH, BPF_MAP_TYPE_PERCPU_HASH},
     maps::{
-        hash_map, IterableMap, Map, MapError, MapIter, MapKeys, MapRef, MapRefMut, PerCpuValues, MapData,
+        hash_map, IterableMap, MapError, MapIter, MapKeys, PerCpuValues, MapData, Map,
     },
     sys::{bpf_map_lookup_elem_per_cpu, bpf_map_update_elem_per_cpu},
     Pod,
@@ -129,6 +127,10 @@ impl<K: Pod, V: Pod> PerCpuHashMap<K, V> {
         MapKeys::new(&self.data)
     }
 
+}
+
+impl<K: Pod, V: Pod> IterableMap<K, PerCpuValues<V>> for PerCpuHashMap<K, V>
+{
     fn map(&self) -> &MapData {
         &self.data
     }

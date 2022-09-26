@@ -1,12 +1,10 @@
 use std::{
     marker::PhantomData,
     mem,
-    ops::{Deref, DerefMut},
 };
 
 use crate::{
-    generated::bpf_map_type::BPF_MAP_TYPE_PERCPU_ARRAY,
-    maps::{IterableMap, Map, MapError, MapRef, MapRefMut, PerCpuValues, MapData},
+    maps::{IterableMap, MapError, PerCpuValues, MapData},
     sys::{bpf_map_lookup_elem_per_cpu, bpf_map_update_elem_per_cpu},
     Pod,
 };
@@ -139,7 +137,4 @@ impl<V: Pod> PerCpuArray<V> {
         &self.data
     }
 
-    fn get(&self, index: &u32) -> Result<PerCpuValues<V>, MapError> {
-        self.get(index, 0)
-    }
 }

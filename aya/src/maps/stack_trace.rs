@@ -1,13 +1,15 @@
 //! A hash map of kernel or user space stack traces.
 //!
 //! See [`StackTraceMap`] for documentation and examples.
-use std::{collections::BTreeMap, fs, io, mem, ops::Deref, path::Path, str::FromStr};
+use std::{collections::BTreeMap, fs, io, mem, path::Path, str::FromStr};
 
 use crate::{
     generated::bpf_map_type::BPF_MAP_TYPE_STACK_TRACE,
-    maps::{IterableMap, Map, MapError, MapIter, MapKeys, MapRef, MapRefMut},
+    maps::{IterableMap, MapError, MapIter, MapKeys},
     sys::bpf_map_lookup_elem_ptr,
 };
+
+use super::MapData;
 
 /// A hash map of kernel or user space stack traces.
 ///
@@ -63,19 +65,14 @@ use crate::{
 ///
 #[derive(Debug)]
 #[doc(alias = "BPF_MAP_TYPE_STACK_TRACE")]
-pub struct StackTraceMap<T> {
-    inner: T,
+pub struct StackTraceMap {
+    data: MapData,
     max_stack_depth: usize,
 }
 
-impl<T: Deref<Target = Map>> StackTraceMap<T> {
-    fn new(map: T) -> Result<StackTraceMap<T>, MapError> {
+impl StackTraceMap {
+    fn new(map: MapData) -> Result<StackTraceMap, MapError> {
         let map_type = map.obj.map_type();
-        if map_type != BPF_MAP_TYPE_STACK_TRACE as u32 {
-            return Err(MapError::InvalidMapType {
-                map_type: map_type as u32,
-            });
-        }
         let expected = mem::size_of::<u32>();
         let size = map.obj.key_size() as usize;
         if size != expected {
@@ -96,7 +93,7 @@ impl<T: Deref<Target = Map>> StackTraceMap<T> {
         let _fd = map.fd_or_err()?;
 
         Ok(StackTraceMap {
-            inner: map,
+            data: map,
             max_stack_depth,
         })
     }
@@ -108,7 +105,7 @@ impl<T: Deref<Target = Map>> StackTraceMap<T> {
     /// Returns [`MapError::KeyNotFound`] if there is no stack trace with the
     /// given `stack_id`, or [`MapError::SyscallError`] if `bpf_map_lookup_elem` fails.
     pub fn get(&self, stack_id: &u32, flags: u64) -> Result<StackTrace, MapError> {
-        let fd = self.inner.fd_or_err()?;
+        let fd = self.data.fd_or_err()?;
 
         let mut frames = vec![0; self.max_stack_depth];
         bpf_map_lookup_elem_ptr(fd, Some(stack_id), frames.as_mut_ptr(), flags)
@@ -142,13 +139,17 @@ impl<T: Deref<Target = Map>> StackTraceMap<T> {
     /// An iterator visiting all the stack_ids in arbitrary order. The iterator element
     /// type is `Result<u32, MapError>`.
     pub fn stack_ids(&self) -> MapKeys<'_, u32> {
-        MapKeys::new(&self.inner)
+        MapKeys::new(&self.data)
+    }
+
+    fn map(&self) -> &MapData {
+        &self.data
     }
 }
 
-impl<T: Deref<Target = Map>> IterableMap<u32, StackTrace> for StackTraceMap<T> {
-    fn map(&self) -> &Map {
-        &self.inner
+impl IterableMap<u32, StackTrace> for StackTraceMap {
+    fn map(&self) -> &MapData {
+        &self.data
     }
 
     fn get(&self, index: &u32) -> Result<StackTrace, MapError> {
@@ -156,25 +157,9 @@ impl<T: Deref<Target = Map>> IterableMap<u32, StackTrace> for StackTraceMap<T> {
     }
 }
 
-impl TryFrom<MapRef> for StackTraceMap<MapRef> {
-    type Error = MapError;
-
-    fn try_from(a: MapRef) -> Result<StackTraceMap<MapRef>, MapError> {
-        StackTraceMap::new(a)
-    }
-}
-
-impl TryFrom<MapRefMut> for StackTraceMap<MapRefMut> {
-    type Error = MapError;
-
-    fn try_from(a: MapRefMut) -> Result<StackTraceMap<MapRefMut>, MapError> {
-        StackTraceMap::new(a)
-    }
-}
-
-impl<'a, T: Deref<Target = Map>> IntoIterator for &'a StackTraceMap<T> {
+impl<'a> IntoIterator for &'a StackTraceMap {
     type Item = Result<(u32, StackTrace), MapError>;
-    type IntoIter = MapIter<'a, u32, StackTrace, StackTraceMap<T>>;
+    type IntoIter = MapIter<'a, u32, StackTrace, StackTraceMap>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()

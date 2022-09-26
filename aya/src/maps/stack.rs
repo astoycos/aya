@@ -2,12 +2,10 @@
 use std::{
     marker::PhantomData,
     mem,
-    ops::{Deref, DerefMut},
 };
 
 use crate::{
-    generated::bpf_map_type::BPF_MAP_TYPE_STACK,
-    maps::{Map, MapError},
+    maps::MapError,
     sys::{bpf_map_lookup_and_delete_elem, bpf_map_update_elem},
     Pod,
 };
@@ -39,12 +37,6 @@ pub struct Stack<V: Pod> {
 
 impl<V: Pod> Stack<V> {
     fn new(map: MapData) -> Result<Stack<V>, MapError> {
-        let map_type = map.obj.map_type();
-        if map_type != BPF_MAP_TYPE_STACK as u32 {
-            return Err(MapError::InvalidMapType {
-                map_type: map_type as u32,
-            });
-        }
         let expected = 0;
         let size = map.obj.key_size() as usize;
         if size != expected {
@@ -70,10 +62,8 @@ impl<V: Pod> Stack<V> {
     pub fn capacity(&self) -> u32 {
         self.data.obj.max_entries()
     }
-}
 
-impl<T: Deref<Target = Map> + DerefMut<Target = Map>, V: Pod> Stack<T, V> {
-    /// Removes the last element and returns it.
+        /// Removes the last element and returns it.
     ///
     /// # Errors
     ///
@@ -105,21 +95,5 @@ impl<T: Deref<Target = Map> + DerefMut<Target = Map>, V: Pod> Stack<T, V> {
             }
         })?;
         Ok(())
-    }
-}
-
-impl<V: Pod> TryFrom<MapRef> for Stack<MapRef, V> {
-    type Error = MapError;
-
-    fn try_from(a: MapRef) -> Result<Stack<MapRef, V>, MapError> {
-        Stack::new(a)
-    }
-}
-
-impl<V: Pod> TryFrom<MapRefMut> for Stack<MapRefMut, V> {
-    type Error = MapError;
-
-    fn try_from(a: MapRefMut) -> Result<Stack<MapRefMut, V>, MapError> {
-        Stack::new(a)
     }
 }

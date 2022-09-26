@@ -2,7 +2,7 @@
 use std::mem;
 
 use crate::{
-    maps::{Map, MapError},
+    maps::MapError,
     sys::{bpf_map_delete_elem, bpf_map_update_elem},
 };
 

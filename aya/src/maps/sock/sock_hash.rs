@@ -5,7 +5,7 @@ use std::{
 
 use crate::{
     maps::{
-        hash_map, sock::SocketMap, IterableMap, MapError, MapIter, MapKeys, MapRef, MapRefMut, MapData,
+        hash_map, sock::SocketMap, IterableMap, MapError, MapIter, MapKeys, MapData,
     },
     sys::bpf_map_lookup_elem,
     Pod,
@@ -108,15 +108,17 @@ impl<K: Pod> SockHash<K> {
         hash_map::remove(&mut self.data, key)
     }
 
+    fn fd_or_err(&self) -> Result<RawFd, MapError> {
+        self.data.fd_or_err()
+    }
+}
+
+impl<K: Pod> IterableMap<K, RawFd> for SockHash<K> {
     fn map(&self) -> &MapData {
         &self.data
     }
 
     fn get(&self, key: &K) -> Result<RawFd, MapError> {
         SockHash::get(self, key, 0)
-    }
-
-    fn fd_or_err(&self) -> Result<RawFd, MapError> {
-        self.data.fd_or_err()
     }
 }

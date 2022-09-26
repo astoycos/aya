@@ -16,7 +16,6 @@ use crate::{
         bpf_map_type::BPF_MAP_TYPE_PERF_EVENT_ARRAY, AYA_PERF_EVENT_IOC_DISABLE,
         AYA_PERF_EVENT_IOC_ENABLE, AYA_PERF_EVENT_IOC_SET_BPF,
     },
-    maps::{Map, MapError, MapData},
     obj::{
         btf::{Btf, BtfError},
         MapKind, Object, ParseError, ProgramSection,
@@ -28,8 +27,9 @@ use crate::{
         SkSkbKind, SockOps, SocketFilter, TracePoint, UProbe, Xdp,
     },
     maps::{
+        Map, MapError, MapData, StackTraceMap,
         Array,PerCpuArray,ProgramArray, HashMap as AyaHashMap, PerCpuHashMap, PerfEventArray,
-        bloom_filter::BloomFilter, SockHash, SockMap, lpm_trie::LpmTrie, Stack, stack_trace::StackTrace
+        bloom_filter::BloomFilter, SockHash, SockMap, lpm_trie::LpmTrie, Stack, Queue
     },
     sys::{
         bpf_load_btf, bpf_map_freeze, bpf_map_update_elem_ptr, is_btf_datasec_supported,
@@ -659,15 +659,9 @@ impl<'a> BpfLoader<'a> {
                     BPF_MAP_TYPE_BLOOM_FILTER => Map::BloomFilter(BloomFilter::new(map)),
                     BPF_MAP_TYPE_LPM_TRIE => Map::LpmTrie(LpmTrie::new(map)),
                     BPF_MAP_TYPE_STACK => Map::Stack(Stack::new(map)),
-
-
-
-
-
-
-
-
-                }   
+                    BPF_MAP_TYPE_STACK_TRACE => Map::StackTrace(StackTraceMap::new(map)),
+                    BPF_MAP_TYPE_QUEUE => Map::Queue(Queue::new(map)),
+                }
             })
             .collect();
         Ok(Bpf { maps, programs })
@@ -683,7 +677,7 @@ impl<'a> Default for BpfLoader<'a> {
 /// The main entry point into the library, used to work with eBPF programs and maps.
 #[derive(Debug)]
 pub struct Bpf {
-    maps: HashMap<String, MapLock>,
+    maps: HashMap<String, Map>,
     programs: HashMap<String, Program>,
 }
 
@@ -747,17 +741,8 @@ impl Bpf {
     ///
     /// Returns [`MapError::MapNotFound`] if the map does not exist. If the map is already borrowed
     /// mutably with [map_mut](Self::map_mut) then [`MapError::BorrowError`] is returned.
-    pub fn map(&self, name: &str) -> Result<MapRef, MapError> {
-        self.maps
-            .get(name)
-            .ok_or_else(|| MapError::MapNotFound {
-                name: name.to_owned(),
-            })
-            .and_then(|lock| {
-                lock.try_read().map_err(|_| MapError::BorrowError {
-                    name: name.to_owned(),
-                })
-            })
+    pub fn map(&self, name: &str) -> Option<&Map> {
+        self.maps.get(name)
     }
 
     /// Returns a mutable reference to the map with the given name.
@@ -772,17 +757,8 @@ impl Bpf {
     ///
     /// Returns [`MapError::MapNotFound`] if the map does not exist. If the map is already borrowed
     /// mutably with [map_mut](Self::map_mut) then [`MapError::BorrowError`] is returned.
-    pub fn map_mut(&self, name: &str) -> Result<MapRefMut, MapError> {
-        self.maps
-            .get(name)
-            .ok_or_else(|| MapError::MapNotFound {
-                name: name.to_owned(),
-            })
-            .and_then(|lock| {
-                lock.try_write().map_err(|_| MapError::BorrowError {
-                    name: name.to_owned(),
-                })
-            })
+    pub fn map_mut(&self, name: &str) -> Option<&mut Program> {
+        self.maps.get(name)
     }
 
     /// An iterator over all the maps.
@@ -799,15 +775,8 @@ impl Bpf {
     /// }
     /// # Ok::<(), aya::BpfError>(())
     /// ```
-    pub fn maps(&self) -> impl Iterator<Item = (&str, Result<MapRef, MapError>)> {
-        let ret = self.maps.iter().map(|(name, lock)| {
-            (
-                name.as_str(),
-                lock.try_read()
-                    .map_err(|_| MapError::BorrowError { name: name.clone() }),
-            )
-        });
-        ret
+    pub fn maps(&self) -> impl Iterator<Item = (&str, &Map)> {
+        self.maps().iter().map(|(s, p)| (s.as_str(), p))
     }
 
     /// Returns a reference to the program with the given name.
