@@ -246,48 +246,124 @@ fn maybe_warn_rlimit() {
 #[derive(Debug)]
 pub enum Map {
     /// A ['Array`] map
-    Array(Array),
+    Array(MapData),
     /// A [`PerCpuArray`] map
-    PerCpuArray(PerCpuArray<dyn Pod>),
+    PerCpuArray(MapData),
     /// A [`ProgramArray`] map 
-    ProgramArray(ProgramArray),
+    ProgramArray(MapData),
     /// A [`HashMap`] map
-    HashMap(HashMap<dyn Pod, dyn Pod>),
+    HashMap(MapData),
     /// A ['PerCpuHashMap'] map
-    PerCpuHashMap(PerCpuHashMap<dyn Pod, dyn Pod>),
+    PerCpuHashMap(MapData),
     /// A [`PerfEventArray`] map
-    PerfEventArray(PerfEventArray),
+    PerfEventArray(MapData),
     /// A [`AsyncPerfEventArray`] map
     /// A [`SockMap`] map
-    SockMap(SockMap),
+    SockMap(MapData),
     /// A [`SockHash`] map
-    SockHash(SockHash<dyn Pod>),
+    SockHash(MapData),
     /// A [`BloomFilter`] map
-    BloomFilter(BloomFilter<dyn Pod>),
+    BloomFilter(MapData),
     /// A [`LpmTrie`] map
-    LpmTrie(LpmTrie<dyn Pod, dyn Pod>),
+    LpmTrie(MapData),
     /// A [`Stack`] map
-    Stack(Stack<dyn Pod>),
+    Stack(MapData),
     /// A [`StackTrace`] map
-    StackTrace(StackTraceMap),
+    StackTrace(MapData),
     /// A [`Queue`] map
-    Queue(Queue<dyn Pod>), 
+    Queue(MapData), 
+}
+
+impl Map { 
+    ///  Returns low level map data for relocation.
+    pub fn section_index(&self) -> usize { 
+        match self {
+            Map::Array(m) => m.obj.section_index(),
+            Map::PerCpuArray(m) => m.obj.section_index(),
+            Map::ProgramArray(m) => m.obj.section_index(),
+            Map::HashMap(m) => m.obj.section_index(),
+            Map::PerCpuHashMap(m) => m.obj.section_index(),
+            Map::PerfEventArray(m) => m.obj.section_index(),
+            Map::SockMap(m) => m.obj.section_index(),
+            Map::SockHash(m) => m.obj.section_index(),
+            Map::BloomFilter(m) => m.obj.section_index(),
+            Map::LpmTrie(m) => m.obj.section_index(),
+            Map::Stack(m) => m.obj.section_index(),
+            Map::StackTrace(m) => m.obj.section_index(),
+            Map::Queue(m) => m.obj.section_index(),
+        }
+    } 
+
+    ///  Returns low level section index for relocation.
+    pub fn symbol_index(&self) -> usize { 
+        match self {
+            Map::Array(m) => m.obj.symbol_index(),
+            Map::PerCpuArray(m) => m.obj.symbol_index(),
+            Map::ProgramArray(m) => m.obj.symbol_index(),
+            Map::HashMap(m) => m.obj.symbol_index(),
+            Map::PerCpuHashMap(m) => m.obj.symbol_index(),
+            Map::PerfEventArray(m) => m.obj.symbol_index(),
+            Map::SockMap(m) => m.obj.symbol_index(),
+            Map::SockHash(m) => m.obj.symbol_index(),
+            Map::BloomFilter(m) => m.obj.symbol_index(),
+            Map::LpmTrie(m) => m.obj.symbol_index(),
+            Map::Stack(m) => m.obj.symbol_index(),
+            Map::StackTrace(m) => m.obj.symbol_index(),
+            Map::Queue(m) => m.obj.symbol_index(),
+        }
+    } 
+
+    ///  Returns low level section index for relcation.
+    pub fn fd_or_err(&self) -> Result<RawFd, MapError> { 
+        match self {
+            Map::Array(m) => m.fd_or_err(),
+            Map::PerCpuArray(m) => m.fd_or_err(),
+            Map::ProgramArray(m) => m.fd_or_err(),
+            Map::HashMap(m) => m.fd_or_err(),
+            Map::PerCpuHashMap(m) => m.fd_or_err(),
+            Map::PerfEventArray(m) => m.fd_or_err(),
+            Map::SockMap(m) => m.fd_or_err(),
+            Map::SockHash(m) => m.fd_or_err(),
+            Map::BloomFilter(m) => m.fd_or_err(),
+            Map::LpmTrie(m) => m.fd_or_err(),
+            Map::Stack(m) => m.fd_or_err(),
+            Map::StackTrace(m) => m.fd_or_err(),
+            Map::Queue(m) => m.fd_or_err(),
+        }
+    }
+    
+    pub fn is_empty(&self) -> bool { 
+        match self {
+            Map::Array(m) => m.obj.data().is_empty(),
+            Map::PerCpuArray(m) => m.obj.data().is_empty(),
+            Map::ProgramArray(m) => m.obj.data().is_empty(),
+            Map::HashMap(m) => m.obj.data().is_empty(),
+            Map::PerCpuHashMap(m) => m.obj.data().is_empty(),
+            Map::PerfEventArray(m) => m.obj.data().is_empty(),
+            Map::SockMap(m) => m.obj.data().is_empty(),
+            Map::SockHash(m) => m.obj.data().is_empty(),
+            Map::BloomFilter(m) => m.obj.data().is_empty(),
+            Map::LpmTrie(m) => m.obj.data().is_empty(),
+            Map::Stack(m) => m.obj.data().is_empty(),
+            Map::StackTrace(m) => m.obj.data().is_empty(),
+            Map::Queue(m) => m.obj.data().is_empty(),
+        }
+    }
 }
 
 /// A generic handle to a BPF map.
 ///
 /// You should never need to use this unless you're implementing a new map type.
 #[derive(Debug)]
-pub struct MapData<V: Pod> {
+pub struct MapData {
     pub(crate) obj: obj::Map,
     pub(crate) fd: Option<RawFd>,
     pub(crate) btf_fd: Option<RawFd>,
-    pub(crate) _v: PhantomData<V>,
     /// Indicates if this map has been pinned to bpffs
     pub pinned: bool,
 }
 
-impl<V: Pod> MapData<V> {
+impl MapData {
     /// Creates a new map with the provided `name`
     pub fn create(&mut self, name: &str) -> Result<RawFd, MapError> {
         if self.fd.is_some() {
@@ -335,7 +411,7 @@ impl<V: Pod> MapData<V> {
     }
 
     /// Loads a map from a pinned path in bpffs.
-    pub fn from_pin<P: AsRef<Path>>(path: P) -> Result<Map, MapError> {
+    pub fn from_pin<P: AsRef<Path>>(path: P) -> Result<MapData, MapError> {
         let path_string =
             CString::new(path.as_ref().to_string_lossy().into_owned()).map_err(|e| {
                 MapError::PinError {
@@ -356,7 +432,7 @@ impl<V: Pod> MapData<V> {
             io_error,
         })?;
 
-        Ok(Map {
+        Ok(MapData {
             obj: parse_map_info(info, PinningType::ByName),
             fd: Some(fd),
             btf_fd: None,
@@ -369,13 +445,13 @@ impl<V: Pod> MapData<V> {
     /// If loading from a BPF Filesystem (bpffs) you should use [`Map::from_pin`].
     /// This API is intended for cases where you have received a valid BPF FD from some other means.
     /// For example, you received an FD over Unix Domain Socket.
-    pub fn from_fd(fd: RawFd) -> Result<Map, MapError> {
+    pub fn from_fd(fd: RawFd) -> Result<MapData, MapError> {
         let info = bpf_map_get_info_by_fd(fd).map_err(|io_error| MapError::SyscallError {
             call: "BPF_OBJ_GET".to_owned(),
             io_error,
         })?;
 
-        Ok(Map {
+        Ok(MapData {
             obj: parse_map_info(info, PinningType::None),
             fd: Some(fd),
             btf_fd: None,
@@ -421,7 +497,7 @@ impl<V: Pod> MapData<V> {
     }
 }
 
-impl Drop for Map {
+impl Drop for MapData {
     fn drop(&mut self) {
         // TODO: Replace this with an OwnedFd once that is stabilized.
         if let Some(fd) = self.fd.take() {
@@ -433,7 +509,7 @@ impl Drop for Map {
 /// An iterable map
 pub trait IterableMap<K: Pod, V> {
     /// Get a generic map handle
-    fn map(&self) -> &Map;
+    fn map(&self) -> &MapData;
 
     /// Get the value for the provided `key`
     fn get(&self, key: &K) -> Result<V, MapError>;
@@ -441,13 +517,13 @@ pub trait IterableMap<K: Pod, V> {
 
 /// Iterator returned by `map.keys()`.
 pub struct MapKeys<'coll, K: Pod> {
-    map: &'coll Map,
+    map: &'coll MapData,
     err: bool,
     key: Option<K>,
 }
 
 impl<'coll, K: Pod> MapKeys<'coll, K> {
-    fn new(map: &'coll Map) -> MapKeys<'coll, K> {
+    fn new(map: &'coll MapData) -> MapKeys<'coll, K> {
         MapKeys {
             map,
             err: false,

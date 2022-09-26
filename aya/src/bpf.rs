@@ -455,27 +455,27 @@ impl<'a> BpfLoader<'a> {
                     }
                 }
             }
-            let mut map = MapData {
+            let mut mapData = MapData {
                 obj,
                 fd: None,
                 pinned: false,
                 btf_fd,
             };
-            let fd = match map.obj.pinning() {
+            let fd = match mapData.obj.pinning() {
                 PinningType::ByName => {
                     let path = match &self.map_pin_path {
                         Some(p) => p,
                         None => return Err(BpfError::NoPinPath),
                     };
                     // try to open map in case it's already pinned
-                    match map.open_pinned(&name, path) {
+                    match mapData.open_pinned(&name, path) {
                         Ok(fd) => {
-                            map.pinned = true;
+                            mapData.pinned = true;
                             fd as RawFd
                         }
                         Err(_) => {
-                            let fd = map.create(&name)?;
-                            map.pin(&name, path).map_err(|error| MapError::PinError {
+                            let fd = mapData.create(&name)?;
+                            mapData.pin(&name, path).map_err(|error| MapError::PinError {
                                 name: Some(name.to_string()),
                                 error,
                             })?;
@@ -483,21 +483,39 @@ impl<'a> BpfLoader<'a> {
                         }
                     }
                 }
-                PinningType::None => map.create(&name)?,
+                PinningType::None => mapData.create(&name)?,
             };
-            if !map.obj.data().is_empty() && map.obj.kind() != MapKind::Bss {
-                bpf_map_update_elem_ptr(fd, &0 as *const _, map.obj.data_mut().as_mut_ptr(), 0)
+            if !mapData.obj.data().is_empty() && mapData.obj.kind() != MapKind::Bss {
+                bpf_map_update_elem_ptr(fd, &0 as *const _, mapData.obj.data_mut().as_mut_ptr(), 0)
                     .map_err(|(_, io_error)| MapError::SyscallError {
                         call: "bpf_map_update_elem".to_owned(),
                         io_error,
                     })?;
             }
-            if map.obj.kind() == MapKind::Rodata {
+            if mapData.obj.kind() == MapKind::Rodata {
                 bpf_map_freeze(fd).map_err(|(_, io_error)| MapError::SyscallError {
                     call: "bpf_map_freeze".to_owned(),
                     io_error,
                 })?;
             }
+
+            let map_type = mapData.map_type()?;
+            let map = match map_type { 
+                BPF_MAP_TYPE_ARRAY => Map::Array(mapData),
+                BPF_MAP_TYPE_PERCPU_ARRAY => Map::PerCpuArray(mapData),
+                BPF_MAP_TYPE_PROGRAM_ARRAY => Map::ProgramArray(mapData),
+                BPF_MAP_TYPE_HASHMAP => Map::HashMap(mapData),
+                BPF_MAP_TYPE_PERCPU_HASH => Map::PerCpuHashMap(mapData),
+                BPF_MAP_TYPE_PERF_EVENT_ARRAY => Map::PerfEventArray(mapData),
+                BPF_MAP_TYPE_SOCKHASH => Map::SockHash(mapData), 
+                BPF_MAP_TYPE_SOCKMAP => Map::SockMap(mapData),
+                BPF_MAP_TYPE_BLOOM_FILTER => Map::BloomFilter(mapData),
+                BPF_MAP_TYPE_LPM_TRIE => Map::LpmTrie(mapData),
+                BPF_MAP_TYPE_STACK => Map::Stack(mapData),
+                BPF_MAP_TYPE_STACK_TRACE => Map::StackTrace(mapData),
+                BPF_MAP_TYPE_QUEUE => Map::Queue(mapData),
+            };
+
             maps.insert(name, map);
         }
 
@@ -642,28 +660,27 @@ impl<'a> BpfLoader<'a> {
                 (name, program)
             })
             .collect();
-        let maps = maps
-            .drain()
-            .map(|(name, map)| {
-                let map_type = map.map_type()?;
-
-                match map_type { 
-                    BPF_MAP_TYPE_ARRAY => Map::Array(Array::new(map)),
-                    BPF_MAP_TYPE_PERCPU_ARRAY => Map::PerCpuArray(PerCpuArray::new(map)),
-                    BPF_MAP_TYPE_PROGRAM_ARRAY => Map::ProgramArray(ProgramArray::new(map)),
-                    BPF_MAP_TYPE_HASHMAP => Map::HashMap(AyaHashMap::new(map)),
-                    BPF_MAP_TYPE_PERCPU_HASH => Map::PerCpuHashMap(PerCpuHashMap::new(map)),
-                    BPF_MAP_TYPE_PERF_EVENT_ARRAY => Map::PerfEventArray(PerfEventArray::new(map)),
-                    BPF_MAP_TYPE_SOCKHASH => Map::SockHash(SockHash::new(map)), 
-                    BPF_MAP_TYPE_SOCKMAP => Map::SockMap(SockMap::new(map)),
-                    BPF_MAP_TYPE_BLOOM_FILTER => Map::BloomFilter(BloomFilter::new(map)),
-                    BPF_MAP_TYPE_LPM_TRIE => Map::LpmTrie(LpmTrie::new(map)),
-                    BPF_MAP_TYPE_STACK => Map::Stack(Stack::new(map)),
-                    BPF_MAP_TYPE_STACK_TRACE => Map::StackTrace(StackTraceMap::new(map)),
-                    BPF_MAP_TYPE_QUEUE => Map::Queue(Queue::new(map)),
-                }
-            })
-            .collect();
+        // let maps = maps
+        //     .drain()
+        //     .map(|(name, map)| {
+        //         let map_type = map.map_type()?;
+        //         match map_type { 
+        //             BPF_MAP_TYPE_ARRAY => Map::Array(map),
+        //             BPF_MAP_TYPE_PERCPU_ARRAY => Map::PerCpuArray(map),
+        //             BPF_MAP_TYPE_PROGRAM_ARRAY => Map::ProgramArray(map),
+        //             BPF_MAP_TYPE_HASHMAP => Map::HashMap(map),
+        //             BPF_MAP_TYPE_PERCPU_HASH => Map::PerCpuHashMap(map),
+        //             BPF_MAP_TYPE_PERF_EVENT_ARRAY => Map::PerfEventArray(map),
+        //             BPF_MAP_TYPE_SOCKHASH => Map::SockHash(map), 
+        //             BPF_MAP_TYPE_SOCKMAP => Map::SockMap(map),
+        //             BPF_MAP_TYPE_BLOOM_FILTER => Map::BloomFilter(map),
+        //             BPF_MAP_TYPE_LPM_TRIE => Map::LpmTrie(map),
+        //             BPF_MAP_TYPE_STACK => Map::Stack(map),
+        //             BPF_MAP_TYPE_STACK_TRACE => Map::StackTrace(map),
+        //             BPF_MAP_TYPE_QUEUE => Map::Queue(map),
+        //         }
+        //     })
+            //.collect();
         Ok(Bpf { maps, programs })
     }
 }
@@ -757,8 +774,8 @@ impl Bpf {
     ///
     /// Returns [`MapError::MapNotFound`] if the map does not exist. If the map is already borrowed
     /// mutably with [map_mut](Self::map_mut) then [`MapError::BorrowError`] is returned.
-    pub fn map_mut(&self, name: &str) -> Option<&mut Program> {
-        self.maps.get(name)
+    pub fn map_mut(&self, name: &str) -> Option<&mut Map> {
+        self.maps.get_mut(name)
     }
 
     /// An iterator over all the maps.
@@ -776,7 +793,7 @@ impl Bpf {
     /// # Ok::<(), aya::BpfError>(())
     /// ```
     pub fn maps(&self) -> impl Iterator<Item = (&str, &Map)> {
-        self.maps().iter().map(|(s, p)| (s.as_str(), p))
+        self.maps.iter().map(|(s, p)| (s.as_str(), p))
     }
 
     /// Returns a reference to the program with the given name.

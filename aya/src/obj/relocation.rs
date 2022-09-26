@@ -9,7 +9,7 @@ use crate::{
         bpf_insn, BPF_CALL, BPF_JMP, BPF_K, BPF_PSEUDO_CALL, BPF_PSEUDO_FUNC, BPF_PSEUDO_MAP_FD,
         BPF_PSEUDO_MAP_VALUE,
     },
-    maps::Map,
+    maps::{Map, MapData},
     obj::{Function, Object, Program},
     BpfError,
 };
@@ -65,12 +65,12 @@ impl Object {
     pub fn relocate_maps(&mut self, maps: &HashMap<String, Map>) -> Result<(), BpfError> {
         let maps_by_section = maps
             .iter()
-            .map(|(name, map)| (map.obj.section_index(), (name.as_str(), map)))
+            .map(|(name, map)| (map.section_index(), (name.as_str(), map)))
             .collect::<HashMap<_, _>>();
 
         let maps_by_symbol = maps
             .iter()
-            .map(|(name, map)| (map.obj.symbol_index(), (name.as_str(), map)))
+            .map(|(name, map)| (map.symbol_index(), (name.as_str(), map)))
             .collect::<HashMap<_, _>>();
 
         let functions = self
@@ -184,12 +184,12 @@ fn relocate_maps<'a, I: Iterator<Item = &'a Relocation>>(
                 })?
         };
 
-        let map_fd = map.fd.ok_or_else(|| RelocationError::MapNotCreated {
+        let map_fd = map.fd_or_err().map_err(|_| RelocationError::MapNotCreated {
             name: (*name).into(),
             section_index,
         })?;
 
-        if !map.obj.data().is_empty() {
+        if !map.is_empty() {
             instructions[ins_index].set_src_reg(BPF_PSEUDO_MAP_VALUE as u8);
             instructions[ins_index + 1].imm = instructions[ins_index].imm + sym.address as i32;
         } else {
