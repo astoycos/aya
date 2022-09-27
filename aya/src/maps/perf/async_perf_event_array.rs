@@ -109,12 +109,6 @@ impl AsyncPerfEventArray {
             async_fd: Async::new(fd)?,
         })
     }
-
-    fn new(map: MapData) -> Result<AsyncPerfEventArray, MapError> {
-        Ok(AsyncPerfEventArray {
-            perf_map: PerfEventArray::new(map)?,
-        })
-    }
 }
 
 

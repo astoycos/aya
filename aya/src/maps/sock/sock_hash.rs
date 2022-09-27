@@ -5,7 +5,7 @@ use std::{
 
 use crate::{
     maps::{
-        hash_map, sock::SocketMap, IterableMap, MapError, MapIter, MapKeys, MapData,
+        hash_map, IterableMap, MapError, MapIter, MapKeys, MapData,
     },
     sys::bpf_map_lookup_elem,
     Pod,
@@ -59,24 +59,15 @@ use crate::{
 /// ```
 #[doc(alias = "BPF_MAP_TYPE_SOCKHASH")]
 pub struct SockHash<K> {
-    data: MapData,
+    fd: RawFd,
+    max_entries: u32,
     _k: PhantomData<K>,
 }
 
 impl<K: Pod> SockHash<K> {
-    fn new(map: MapData) -> Result<SockHash<K>, MapError> {
-        hash_map::check_kv_size::<K, u32>(&map)?;
-        let _ = map.fd_or_err()?;
-
-        Ok(SockHash {
-            data: map,
-            _k: PhantomData,
-        })
-    }
-
     /// Returns the fd of the socket stored at the given key.
     pub fn get(&self, key: &K, flags: u64) -> Result<RawFd, MapError> {
-        let fd = self.data.deref().fd_or_err()?;
+        let fd = self.fd;
         let value = bpf_map_lookup_elem(fd, key, flags).map_err(|(_, io_error)| {
             MapError::SyscallError {
                 call: "bpf_map_lookup_elem".to_owned(),
@@ -95,27 +86,23 @@ impl<K: Pod> SockHash<K> {
     /// An iterator visiting all keys in arbitrary order. The iterator element
     /// type is `Result<K, MapError>`.
     pub fn keys(&self) -> MapKeys<'_, K> {
-        MapKeys::new(&self.data)
+        MapKeys::new(&self.fd)
     }
 
     /// Inserts a socket under the given key.
     pub fn insert<I: AsRawFd>(&mut self, key: K, value: I, flags: u64) -> Result<(), MapError> {
-        hash_map::insert(&mut self.data, key, value.as_raw_fd(), flags)
+        hash_map::insert(&mut self.fd, key, value.as_raw_fd(), flags)
     }
 
     /// Removes a socket from the map.
     pub fn remove(&mut self, key: &K) -> Result<(), MapError> {
-        hash_map::remove(&mut self.data, key)
-    }
-
-    fn fd_or_err(&self) -> Result<RawFd, MapError> {
-        self.data.fd_or_err()
+        hash_map::remove(&mut self.fd, key)
     }
 }
 
 impl<K: Pod> IterableMap<K, RawFd> for SockHash<K> {
-    fn map(&self) -> &MapData {
-        &self.data
+    fn fd(&self) -> &RawFd {
+        &self.fd
     }
 
     fn get(&self, key: &K) -> Result<RawFd, MapError> {

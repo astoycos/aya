@@ -1,7 +1,7 @@
 //! A LIFO stack.
 use std::{
     marker::PhantomData,
-    mem,
+    os::unix::prelude::RawFd,
 };
 
 use crate::{
@@ -31,36 +31,17 @@ use super::MapData;
 /// ```
 #[doc(alias = "BPF_MAP_TYPE_STACK")]
 pub struct Stack<V: Pod> {
-    data: MapData,
+    fd: RawFd,
+    max_entries: u32,
     _v: PhantomData<V>,
 }
 
 impl<V: Pod> Stack<V> {
-    fn new(map: MapData) -> Result<Stack<V>, MapError> {
-        let expected = 0;
-        let size = map.obj.key_size() as usize;
-        if size != expected {
-            return Err(MapError::InvalidKeySize { size, expected });
-        }
-
-        let expected = mem::size_of::<V>();
-        let size = map.obj.value_size() as usize;
-        if size != expected {
-            return Err(MapError::InvalidValueSize { size, expected });
-        }
-        let _fd = map.fd_or_err()?;
-
-        Ok(Stack {
-            data: map,
-            _v: PhantomData,
-        })
-    }
-
     /// Returns the number of elements the stack can hold.
     ///
     /// This corresponds to the value of `bpf_map_def::max_entries` on the eBPF side.
     pub fn capacity(&self) -> u32 {
-        self.data.obj.max_entries()
+        self.max_entries
     }
 
         /// Removes the last element and returns it.
@@ -70,7 +51,7 @@ impl<V: Pod> Stack<V> {
     /// Returns [`MapError::ElementNotFound`] if the stack is empty, [`MapError::SyscallError`]
     /// if `bpf_map_lookup_and_delete_elem` fails.
     pub fn pop(&mut self, flags: u64) -> Result<V, MapError> {
-        let fd = self.data.fd_or_err()?;
+        let fd = self.fd;
 
         let value = bpf_map_lookup_and_delete_elem::<u32, _>(fd, None, flags).map_err(
             |(_, io_error)| MapError::SyscallError {
@@ -87,7 +68,7 @@ impl<V: Pod> Stack<V> {
     ///
     /// [`MapError::SyscallError`] if `bpf_map_update_elem` fails.
     pub fn push(&mut self, value: V, flags: u64) -> Result<(), MapError> {
-        let fd = self.data.fd_or_err()?;
+        let fd = self.fd;
         bpf_map_update_elem(fd, None::<&u32>, &value, flags).map_err(|(_, io_error)| {
             MapError::SyscallError {
                 call: "bpf_map_update_elem".to_owned(),

@@ -13,8 +13,8 @@ use thiserror::Error;
 
 use crate::{
     generated::{
-        bpf_map_type::BPF_MAP_TYPE_PERF_EVENT_ARRAY, AYA_PERF_EVENT_IOC_DISABLE,
-        AYA_PERF_EVENT_IOC_ENABLE, AYA_PERF_EVENT_IOC_SET_BPF,
+        bpf_map_type::*,
+        AYA_PERF_EVENT_IOC_ENABLE,AYA_PERF_EVENT_IOC_DISABLE,AYA_PERF_EVENT_IOC_SET_BPF
     },
     obj::{
         btf::{Btf, BtfError},
@@ -27,9 +27,7 @@ use crate::{
         SkSkbKind, SockOps, SocketFilter, TracePoint, UProbe, Xdp,
     },
     maps::{
-        Map, MapError, MapData, StackTraceMap,
-        Array,PerCpuArray,ProgramArray, HashMap as AyaHashMap, PerCpuHashMap, PerfEventArray,
-        bloom_filter::BloomFilter, SockHash, SockMap, lpm_trie::LpmTrie, Stack, Queue
+        Map, MapError, MapData
     },
     sys::{
         bpf_load_btf, bpf_map_freeze, bpf_map_update_elem_ptr, is_btf_datasec_supported,
@@ -501,20 +499,21 @@ impl<'a> BpfLoader<'a> {
 
             let map_type = mapData.map_type()?;
             let map = match map_type { 
-                BPF_MAP_TYPE_ARRAY => Map::Array(mapData),
-                BPF_MAP_TYPE_PERCPU_ARRAY => Map::PerCpuArray(mapData),
-                BPF_MAP_TYPE_PROGRAM_ARRAY => Map::ProgramArray(mapData),
-                BPF_MAP_TYPE_HASHMAP => Map::HashMap(mapData),
-                BPF_MAP_TYPE_PERCPU_HASH => Map::PerCpuHashMap(mapData),
-                BPF_MAP_TYPE_PERF_EVENT_ARRAY => Map::PerfEventArray(mapData),
-                BPF_MAP_TYPE_SOCKHASH => Map::SockHash(mapData), 
-                BPF_MAP_TYPE_SOCKMAP => Map::SockMap(mapData),
-                BPF_MAP_TYPE_BLOOM_FILTER => Map::BloomFilter(mapData),
-                BPF_MAP_TYPE_LPM_TRIE => Map::LpmTrie(mapData),
-                BPF_MAP_TYPE_STACK => Map::Stack(mapData),
-                BPF_MAP_TYPE_STACK_TRACE => Map::StackTrace(mapData),
-                BPF_MAP_TYPE_QUEUE => Map::Queue(mapData),
-            };
+                BPF_MAP_TYPE_ARRAY => Ok(Map::Array(mapData)),
+                BPF_MAP_TYPE_PERCPU_ARRAY => Ok(Map::PerCpuArray(mapData)),
+                BPF_MAP_TYPE_PROG_ARRAY => Ok(Map::ProgramArray(mapData)),
+                BPF_MAP_TYPE_HASH => Ok(Map::HashMap(mapData)),
+                BPF_MAP_TYPE_PERCPU_HASH => Ok(Map::PerCpuHashMap(mapData)),
+                BPF_MAP_TYPE_PERF_EVENT_ARRAY => Ok(Map::PerfEventArray(mapData)),
+                BPF_MAP_TYPE_SOCKHASH => Ok(Map::SockHash(mapData)), 
+                BPF_MAP_TYPE_SOCKMAP => Ok(Map::SockMap(mapData)),
+                BPF_MAP_TYPE_BLOOM_FILTER => Ok(Map::BloomFilter(mapData)),
+                BPF_MAP_TYPE_LPM_TRIE => Ok(Map::LpmTrie(mapData)),
+                BPF_MAP_TYPE_STACK => Ok(Map::Stack(mapData)),
+                BPF_MAP_TYPE_STACK_TRACE => Ok(Map::StackTrace(mapData)),
+                BPF_MAP_TYPE_QUEUE => Ok(Map::Queue(mapData)),
+                e => Err(MapError::InvalidMapType { map_type: e as u32 })
+            }?;
 
             maps.insert(name, map);
         }
@@ -774,7 +773,7 @@ impl Bpf {
     ///
     /// Returns [`MapError::MapNotFound`] if the map does not exist. If the map is already borrowed
     /// mutably with [map_mut](Self::map_mut) then [`MapError::BorrowError`] is returned.
-    pub fn map_mut(&self, name: &str) -> Option<&mut Map> {
+    pub fn map_mut(&mut self, name: &str) -> Option<&mut Map> {
         self.maps.get_mut(name)
     }
 

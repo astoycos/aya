@@ -1,8 +1,8 @@
 //! A LPM Trie.
-use std::{marker::PhantomData, mem, ops::Deref};
+use std::{marker::PhantomData, mem, os::unix::prelude::RawFd};
 
 use crate::{
-    maps::{IterableMap, Map, MapError},
+    maps::MapError,
     sys::{bpf_map_delete_elem, bpf_map_lookup_elem, bpf_map_update_elem},
     Pod,
 };
@@ -45,7 +45,8 @@ use super::MapData;
 
 #[doc(alias = "BPF_MAP_TYPE_LPM_TRIE")]
 pub struct LpmTrie<K, V> {
-    data: MapData,
+    fd: RawFd,
+    max_entries: u32,
     _k: PhantomData<K>,
     _v: PhantomData<V>,
 }
@@ -98,31 +99,10 @@ impl<K: Pod> Clone for Key<K> {
 unsafe impl<K: Pod> Pod for Key<K> {}
 
 impl<K: Pod, V: Pod> LpmTrie<K, V> {
-    pub(crate) fn new(map: MapData) -> Result<LpmTrie<K, V>, MapError> {
-        let size = mem::size_of::<Key<K>>();
-        let expected = map.obj.key_size() as usize;
-        if size != expected {
-            return Err(MapError::InvalidKeySize { size, expected });
-        }
-        let size = mem::size_of::<V>();
-        let expected = map.obj.value_size() as usize;
-        if size != expected {
-            return Err(MapError::InvalidValueSize { size, expected });
-        };
-
-        let _ = map.fd_or_err()?;
-
-        Ok(LpmTrie {
-            data: map,
-            _k: PhantomData,
-            _v: PhantomData,
-        })
-    }
-
     /// Returns a copy of the value associated with the longest prefix matching key in the LpmTrie.
     pub fn get(&self, key: &Key<K>, flags: u64) -> Result<V, MapError> {
         let lookup = Key::new(mem::size_of::<K>() as u32, *key);
-        let fd = self.data.deref().fd_or_err()?;
+        let fd = self.fd;
         let value = bpf_map_lookup_elem(fd, &lookup, flags).map_err(|(_, io_error)| {
             MapError::SyscallError {
                 call: "bpf_map_lookup_elem".to_owned(),
@@ -134,7 +114,7 @@ impl<K: Pod, V: Pod> LpmTrie<K, V> {
 
     /// Inserts a key value pair into the map.
     pub fn insert(&self, key: &Key<K>, value: V, flags: u64) -> Result<(), MapError> {
-        let fd = self.data.deref().fd_or_err()?;
+        let fd = self.fd;
         bpf_map_update_elem(fd, Some(key), &value, flags).map_err(|(_, io_error)| {
             MapError::SyscallError {
                 call: "bpf_map_update_elem".to_owned(),
@@ -149,17 +129,13 @@ impl<K: Pod, V: Pod> LpmTrie<K, V> {
     ///
     /// Both the prefix and data must match exactly - this method does not do a longest prefix match.
     pub fn remove(&self, key: &Key<K>) -> Result<(), MapError> {
-        let fd = self.data.deref().fd_or_err()?;
+        let fd = self.fd;
         bpf_map_delete_elem(fd, key)
             .map(|_| ())
             .map_err(|(_, io_error)| MapError::SyscallError {
                 call: "bpf_map_delete_elem".to_owned(),
                 io_error,
             })
-    }
-
-    fn map(&self) -> &Map {
-        &self.data
     }
 
 }

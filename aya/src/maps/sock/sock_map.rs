@@ -38,36 +38,20 @@ use crate::{
 /// ```
 #[doc(alias = "BPF_MAP_TYPE_SOCKMAP")]
 pub struct SockMap {
-    data: MapData,
+    fd: RawFd,
+    max_entries: u32,
 }
 
 impl SockMap {
-    fn new(map: MapData) -> Result<SockMap, MapError> {
-        let expected = mem::size_of::<u32>();
-        let size = map.obj.key_size() as usize;
-        if size != expected {
-            return Err(MapError::InvalidKeySize { size, expected });
-        }
-
-        let expected = mem::size_of::<RawFd>();
-        let size = map.obj.value_size() as usize;
-        if size != expected {
-            return Err(MapError::InvalidValueSize { size, expected });
-        }
-        let _fd = map.fd_or_err()?;
-
-        Ok(SockMap { data: map })
-    }
-
     /// An iterator over the indices of the array that point to a program. The iterator item type
     /// is `Result<u32, MapError>`.
     pub fn indices(&self) -> MapKeys<'_, u32> {
-        MapKeys::new(&self.data)
+        MapKeys::new(&self.fd)
     }
 
     fn check_bounds(&self, index: u32) -> Result<(), MapError> {
-        let max_entries = self.data.obj.max_entries();
-        if index >= self.data.obj.max_entries() {
+        let max_entries = self.max_entries;
+        if index >= max_entries {
             Err(MapError::OutOfBounds { index, max_entries })
         } else {
             Ok(())
@@ -76,7 +60,7 @@ impl SockMap {
 
     /// Stores a socket into the map.
     pub fn set<I: AsRawFd>(&mut self, index: u32, socket: &I, flags: u64) -> Result<(), MapError> {
-        let fd = self.data.fd_or_err()?;
+        let fd = self.fd;
         self.check_bounds(index)?;
         bpf_map_update_elem(fd, Some(&index), &socket.as_raw_fd(), flags).map_err(
             |(_, io_error)| MapError::SyscallError {
@@ -89,7 +73,7 @@ impl SockMap {
 
     /// Removes the socket stored at `index` from the map.
     pub fn clear_index(&mut self, index: &u32) -> Result<(), MapError> {
-        let fd = self.data.fd_or_err()?;
+        let fd = self.fd;
         self.check_bounds(*index)?;
         bpf_map_delete_elem(fd, index)
             .map(|_| ())
@@ -97,9 +81,5 @@ impl SockMap {
                 call: "bpf_map_delete_elem".to_owned(),
                 io_error,
             })
-    }
-
-    fn fd_or_err(&self) -> Result<RawFd, MapError> {
-        self.data.fd_or_err()
     }
 }

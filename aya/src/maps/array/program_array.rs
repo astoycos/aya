@@ -48,36 +48,20 @@ use crate::{
 /// ```
 #[doc(alias = "BPF_MAP_TYPE_PROG_ARRAY")]
 pub struct ProgramArray {
-    data: MapData,
+    fd: RawFd,
+    max_entries: u32,
 }
 
 impl ProgramArray {
-    fn new(map: MapData) -> Result<ProgramArray, MapError> {
-        let expected = mem::size_of::<u32>();
-        let size = map.obj.key_size() as usize;
-        if size != expected {
-            return Err(MapError::InvalidKeySize { size, expected });
-        }
-
-        let expected = mem::size_of::<RawFd>();
-        let size = map.obj.value_size() as usize;
-        if size != expected {
-            return Err(MapError::InvalidValueSize { size, expected });
-        }
-        let _fd = map.fd_or_err()?;
-
-        Ok(ProgramArray { data: map })
-    }
-
     /// An iterator over the indices of the array that point to a program. The iterator item type
     /// is `Result<u32, MapError>`.
     pub fn indices(&self) -> MapKeys<'_, u32> {
-        MapKeys::new(&self.data)
+        MapKeys::new(&self.fd)
     }
 
     fn check_bounds(&self, index: u32) -> Result<(), MapError> {
-        let max_entries = self.data.obj.max_entries();
-        if index >= self.data.obj.max_entries() {
+        let max_entries = self.max_entries;
+        if index >= self.max_entries {
             Err(MapError::OutOfBounds { index, max_entries })
         } else {
             Ok(())
@@ -89,7 +73,7 @@ impl ProgramArray {
     /// When an eBPF program calls `bpf_tail_call(ctx, prog_array, index)`, control
     /// flow will jump to `program`.
     pub fn set(&mut self, index: u32, program: ProgramFd, flags: u64) -> Result<(), MapError> {
-        let fd = self.data.fd_or_err()?;
+        let fd = self.fd;
         self.check_bounds(index)?;
         let prog_fd = program.as_raw_fd();
 
@@ -107,7 +91,7 @@ impl ProgramArray {
     /// Calling `bpf_tail_call(ctx, prog_array, index)` on an index that has been cleared returns an
     /// error.
     pub fn clear_index(&mut self, index: &u32) -> Result<(), MapError> {
-        let fd = self.data.fd_or_err()?;
+        let fd = self.fd;
         self.check_bounds(*index)?;
         bpf_map_delete_elem(fd, index)
             .map(|_| ())

@@ -1,10 +1,17 @@
 //! A hash map of kernel or user space stack traces.
 //!
 //! See [`StackTraceMap`] for documentation and examples.
-use std::{collections::BTreeMap, fs, io, mem, path::Path, str::FromStr};
+use std::{
+    collections::BTreeMap, 
+    fs, 
+    io, 
+    mem, 
+    path::Path, 
+    str::FromStr,
+    os::unix::prelude::RawFd
+};
 
 use crate::{
-    generated::bpf_map_type::BPF_MAP_TYPE_STACK_TRACE,
     maps::{IterableMap, MapError, MapIter, MapKeys},
     sys::bpf_map_lookup_elem_ptr,
 };
@@ -66,38 +73,12 @@ use super::MapData;
 #[derive(Debug)]
 #[doc(alias = "BPF_MAP_TYPE_STACK_TRACE")]
 pub struct StackTraceMap {
-    data: MapData,
+    fd: RawFd,
+    max_entries: u32,
     max_stack_depth: usize,
 }
 
 impl StackTraceMap {
-    fn new(map: MapData) -> Result<StackTraceMap, MapError> {
-        let map_type = map.obj.map_type();
-        let expected = mem::size_of::<u32>();
-        let size = map.obj.key_size() as usize;
-        if size != expected {
-            return Err(MapError::InvalidKeySize { size, expected });
-        }
-
-        let max_stack_depth =
-            sysctl::<usize>("kernel/perf_event_max_stack").map_err(|io_error| {
-                MapError::SyscallError {
-                    call: "sysctl".to_owned(),
-                    io_error,
-                }
-            })?;
-        let size = map.obj.value_size() as usize;
-        if size > max_stack_depth * mem::size_of::<u64>() {
-            return Err(MapError::InvalidValueSize { size, expected });
-        }
-        let _fd = map.fd_or_err()?;
-
-        Ok(StackTraceMap {
-            data: map,
-            max_stack_depth,
-        })
-    }
-
     /// Returns the stack trace with the given stack_id.
     ///
     /// # Errors
@@ -105,7 +86,7 @@ impl StackTraceMap {
     /// Returns [`MapError::KeyNotFound`] if there is no stack trace with the
     /// given `stack_id`, or [`MapError::SyscallError`] if `bpf_map_lookup_elem` fails.
     pub fn get(&self, stack_id: &u32, flags: u64) -> Result<StackTrace, MapError> {
-        let fd = self.data.fd_or_err()?;
+        let fd = self.fd;
 
         let mut frames = vec![0; self.max_stack_depth];
         bpf_map_lookup_elem_ptr(fd, Some(stack_id), frames.as_mut_ptr(), flags)
@@ -139,17 +120,13 @@ impl StackTraceMap {
     /// An iterator visiting all the stack_ids in arbitrary order. The iterator element
     /// type is `Result<u32, MapError>`.
     pub fn stack_ids(&self) -> MapKeys<'_, u32> {
-        MapKeys::new(&self.data)
-    }
-
-    fn map(&self) -> &MapData {
-        &self.data
+        MapKeys::new(&self.fd)
     }
 }
 
 impl IterableMap<u32, StackTrace> for StackTraceMap {
-    fn map(&self) -> &MapData {
-        &self.data
+    fn fd(&self) -> &RawFd {
+        &self.fd
     }
 
     fn get(&self, index: &u32) -> Result<StackTrace, MapError> {

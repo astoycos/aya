@@ -1,6 +1,7 @@
 //! Per-CPU hash map.
 use std::{
     marker::PhantomData,
+    os::unix::prelude::RawFd
 };
 
 use crate::{
@@ -41,26 +42,16 @@ use crate::{
 #[doc(alias = "BPF_MAP_TYPE_LRU_PERCPU_HASH")]
 #[doc(alias = "BPF_MAP_TYPE_PERCPU_HASH")]
 pub struct PerCpuHashMap<K: Pod, V: Pod> {
-    data: MapData,
+    fd: RawFd,
+    max_entries: u32,
     _k: PhantomData<K>,
     _v: PhantomData<V>,
 }
 
 impl<K: Pod, V: Pod> PerCpuHashMap<K, V> {
-    fn new(map: MapData) -> Result<PerCpuHashMap<K, V>, MapError> {
-        hash_map::check_kv_size::<K, V>(&map)?;
-        let _ = map.fd_or_err()?;
-
-        Ok(PerCpuHashMap {
-            data: map,
-            _k: PhantomData,
-            _v: PhantomData,
-        })
-    }
-
     /// Returns a slice of values - one for each CPU - associated with the key.
     pub fn get(&self, key: &K, flags: u64) -> Result<PerCpuValues<V>, MapError> {
-        let fd = self.data.deref().fd_or_err()?;
+        let fd = self.fd;
         let values = bpf_map_lookup_elem_per_cpu(fd, key, flags).map_err(|(_, io_error)| {
             MapError::SyscallError {
                 call: "bpf_map_lookup_elem".to_owned(),
@@ -99,7 +90,7 @@ impl<K: Pod, V: Pod> PerCpuHashMap<K, V> {
     /// # Ok::<(), Error>(())
     /// ```
     pub fn insert(&mut self, key: K, values: PerCpuValues<V>, flags: u64) -> Result<(), MapError> {
-        let fd = self.data.fd_or_err()?;
+        let fd = self.fd;
         bpf_map_update_elem_per_cpu(fd, &key, &values, flags).map_err(|(_, io_error)| {
             MapError::SyscallError {
                 call: "bpf_map_update_elem".to_owned(),
@@ -112,7 +103,7 @@ impl<K: Pod, V: Pod> PerCpuHashMap<K, V> {
 
     /// Removes a key from the map.
     pub fn remove(&mut self, key: &K) -> Result<(), MapError> {
-        hash_map::remove(&mut self.data, key)
+        hash_map::remove(&mut self.fd, key)
     }
 
     /// An iterator visiting all key-value pairs in arbitrary order. The
@@ -124,15 +115,15 @@ impl<K: Pod, V: Pod> PerCpuHashMap<K, V> {
     /// An iterator visiting all keys in arbitrary order. The iterator element
     /// type is `Result<K, MapError>`.
     pub fn keys(&self) -> MapKeys<'_, K> {
-        MapKeys::new(&self.data)
+        MapKeys::new(&self.fd)
     }
 
 }
 
 impl<K: Pod, V: Pod> IterableMap<K, PerCpuValues<V>> for PerCpuHashMap<K, V>
 {
-    fn map(&self) -> &MapData {
-        &self.data
+    fn fd(&self) -> &RawFd {
+        &self.fd
     }
 
     fn get(&self, key: &K) -> Result<PerCpuValues<V>, MapError> {

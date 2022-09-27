@@ -1,5 +1,6 @@
 use std::{
     marker::PhantomData,
+    ops::Deref, os::unix::prelude::RawFd,
 };
 
 use crate::{
@@ -31,26 +32,16 @@ use crate::{
 #[doc(alias = "BPF_MAP_TYPE_HASH")]
 #[doc(alias = "BPF_MAP_TYPE_LRU_HASH")]
 pub struct HashMap<K, V> {
-    data: MapData,
+    fd: RawFd,
+    max_entries: u32,
     _k: PhantomData<K>,
     _v: PhantomData<V>,
 }
 
 impl<K: Pod, V: Pod> HashMap<K, V> {
-    fn new(map: MapData) -> Result<HashMap<K, V>, MapError> {
-        hash_map::check_kv_size::<K, V>(&map)?;
-        let _ = map.fd_or_err()?;
-
-        Ok(HashMap {
-            data: map,
-            _k: PhantomData,
-            _v: PhantomData,
-        })
-    }
-
     /// Returns a copy of the value associated with the key.
     pub fn get(&self, key: &K, flags: u64) -> Result<V, MapError> {
-        let fd = self.data.deref().fd_or_err()?;
+        let fd = self.fd;
         let value = bpf_map_lookup_elem(fd, key, flags).map_err(|(_, io_error)| {
             MapError::SyscallError {
                 call: "bpf_map_lookup_elem".to_owned(),
@@ -69,23 +60,23 @@ impl<K: Pod, V: Pod> HashMap<K, V> {
     /// An iterator visiting all keys in arbitrary order. The iterator element
     /// type is `Result<K, MapError>`.
     pub fn keys(&self) -> MapKeys<'_, K> {
-        MapKeys::new(&self.data)
+        MapKeys::new(&self.fd)
     }
 
     /// Inserts a key-value pair into the map.
     pub fn insert(&mut self, key: K, value: V, flags: u64) -> Result<(), MapError> {
-    hash_map::insert(&mut self.data, key, value, flags)
+        hash_map::insert(&mut self.fd, key, value, flags)
     }
 
     /// Removes a key from the map.
     pub fn remove(&mut self, key: &K) -> Result<(), MapError> {
-        hash_map::remove(&mut self.data, key)
+        hash_map::remove(&mut self.fd, key)
     }
 }
 
 impl<K: Pod, V: Pod> IterableMap<K, V> for HashMap<K, V> {
-    fn map(&self) -> &MapData {
-        &self.data
+    fn fd(&self) -> &RawFd {
+        &self.fd
     }
 
     fn get(&self, key: &K) -> Result<V, MapError> {

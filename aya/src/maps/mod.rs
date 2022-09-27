@@ -70,7 +70,7 @@ pub mod stack_trace;
 
 pub use array::{Array, PerCpuArray, ProgramArray};
 pub use hash_map::{HashMap, PerCpuHashMap};
-pub use perf::PerfEventArray;
+pub use perf::{PerfEventArray, AsyncPerfEventArray};
 pub use queue::Queue;
 pub use sock::{SockHash, SockMap};
 pub use stack::Stack;
@@ -196,6 +196,10 @@ pub enum MapError {
         #[source]
         error: PinError,
     },
+
+    /// The program is not of the expected type.
+    #[error("unexpected map type")]
+    UnexpectedMapType,
 }
 
 /// A map file descriptor.
@@ -332,6 +336,7 @@ impl Map {
         }
     }
     
+    /// Returns if a given map is empty
     pub fn is_empty(&self) -> bool { 
         match self {
             Map::Array(m) => m.obj.data().is_empty(),
@@ -349,12 +354,263 @@ impl Map {
             Map::Queue(m) => m.obj.data().is_empty(),
         }
     }
+
+    /// Returns if a given map is empty
+    pub fn max_entries(&self) -> u32 { 
+        match self {
+            Map::Array(m) => m.obj.max_entries(),
+            Map::PerCpuArray(m) => m.obj.max_entries(),
+            Map::ProgramArray(m) => m.obj.max_entries(),
+            Map::HashMap(m) => m.obj.max_entries(),
+            Map::PerCpuHashMap(m) => m.obj.max_entries(),
+            Map::PerfEventArray(m) => m.obj.max_entries(),
+            Map::SockMap(m) => m.obj.max_entries(),
+            Map::SockHash(m) => m.obj.max_entries(),
+            Map::BloomFilter(m) => m.obj.max_entries(),
+            Map::LpmTrie(m) => m.obj.max_entries(),
+            Map::Stack(m) => m.obj.max_entries(),
+            Map::StackTrace(m) => m.obj.max_entries(),
+            Map::Queue(m) => m.obj.max_entries(),
+        }
+    }
+
+    pub fn fixed_key_size(&self) -> Option<usize> {
+        match self {
+            Map::Array(_) => Some(mem::size_of::<u32>()),
+            Map::PerCpuArray(_) => Some(mem::size_of::<u32>()),
+            Map::ProgramArray(_) => Some(mem::size_of::<u32>()),
+            Map::SockMap(_) => Some(mem::size_of::<u32>()),
+            _ => None
+        }
+    }
+
+    pub fn fixed_value_size(&self) -> Option<usize> {
+        match self {
+            Map::SockMap(_) => Some(mem::size_of::<RawFd>()),
+            Map::SockHash(_) => Some(mem::size_of::<u32>()),
+            _ => None
+        }
+    }
 }
+
+pub(crate) fn check_fixed_key_value_size(key_size: usize, value_size: usize, map: &MapData) -> Result<(), MapError> {
+    let size = map.obj.key_size() as usize;
+    if size != key_size {
+        return Err(MapError::InvalidKeySize { size, expected: key_size });
+    }
+
+    let size = map.obj.value_size() as usize;
+    if size != value_size {
+        return Err(MapError::InvalidValueSize { size, expected: value_size });
+    };
+
+    Ok(())
+}
+
+macro_rules! impl_try_from_map {
+    ($($ty:ident),+ $(,)?) => {
+        $(
+            impl<'a> TryFrom<&'a Map> for &'a $ty {
+                type Error = MapError;
+                
+                fn try_from(map: &'a Map) -> Result<&'a $ty, MapError> {
+                    match map {
+                        Map::$ty(m) => {
+                                let max_entries = map.max_entries();
+                                let key_size = map.fixed_key_size().unwrap();
+                                let value_size = map.fixed_value_size().unwrap();
+                                check_fixed_key_value_size(key_size,value_size, m)?;
+                                let fd = map.fd_or_err()?;
+
+                                Ok(&$ty {
+                                    fd,
+                                    max_entries 
+                                })
+                        },
+                        _ => Err(MapError::UnexpectedMapType),
+                    }
+                }
+            }
+
+            impl<'a> TryFrom<&'a mut Map> for &'a mut $ty {
+                type Error = MapError;
+
+                fn try_from(map: &'a mut  Map) -> Result<&'a mut $ty, MapError> {
+                    match map {
+                        Map::$ty(m) => {
+                            let max_entries = map.max_entries();
+                            let key_size = map.fixed_key_size().unwrap();
+                            let value_size = map.fixed_value_size().unwrap();
+                            check_fixed_key_value_size(key_size,value_size, m)?;
+                            let fd = m.fd_or_err()?;
+
+                            Ok(&mut $ty {
+                                fd,
+                                max_entries 
+                            })
+                    },
+                    _ => Err(MapError::UnexpectedMapType),
+                    }
+                }
+            }
+        )+
+    }
+}
+
+impl_try_from_map!(
+    ProgramArray,
+    //PerfEventArray,
+    //AsyncPerfEventArray,
+    SockMap,
+);
+
+pub(crate) fn check_value_size<V>(expected: usize, map: &MapData) -> Result<(), MapError> {
+    let size = map.obj.key_size() as usize;
+    if size != expected {
+        return Err(MapError::InvalidKeySize { size, expected });
+    }
+    let size = mem::size_of::<V>();
+    let expected = map.obj.value_size() as usize;
+    if size != expected {
+        return Err(MapError::InvalidValueSize { size, expected });
+    };
+    Ok(())
+}
+
+macro_rules! impl_try_from_map_generic_value {
+    ($($ty:ident),+ $(,)?) => {
+        $(
+            impl<'a, V:Pod> TryFrom<&'a Map> for &'a $ty<V> {
+                type Error = MapError;
+                
+                fn try_from(map: &'a Map) -> Result<&'a $ty<V>, MapError> {
+                    match map {
+                        Map::$ty(m) => {
+                                let max_entries = map.max_entries();
+                                let key_size = map.fixed_key_size().unwrap();
+                                check_value_size::<V>(key_size, m)?;
+                                let fd = map.fd_or_err()?;
+
+                                Ok(&$ty {
+                                    fd: fd.to_owned(),
+                                    max_entries, 
+                                    _v: PhantomData,
+                                })
+                        },
+                        _ => Err(MapError::UnexpectedMapType),
+                    }
+                }
+            }
+
+        impl<'a, V: Pod> TryFrom<&'a mut Map> for &'a mut $ty<V> {
+                type Error = MapError;
+
+                fn try_from(map: &'a mut  Map) -> Result<&'a mut $ty<V>, MapError> {
+                    match map {
+                        Map::$ty(m) => {
+                            let max_entries = map.max_entries();
+                            let key_size = map.fixed_key_size().unwrap();
+                            check_value_size::<V>(key_size, m)?;
+                            let fd = m.fd_or_err()?;
+
+                            Ok(&mut $ty {
+                                fd,
+                                max_entries, 
+                                _v: PhantomData,
+                            })
+                    },
+                    _ => Err(MapError::UnexpectedMapType),
+                }
+            }
+        }
+        )+
+    }
+}
+
+impl_try_from_map_generic_value!(
+    Array,
+    PerCpuArray,
+    //SockHash,
+    BloomFilter,
+    Stack,
+    Queue,
+);
+
+pub(crate) fn check_kv_size<K, V>(map: &MapData) -> Result<(), MapError> {
+    let size = mem::size_of::<K>();
+    let expected = map.obj.key_size() as usize;
+    if size != expected {
+        return Err(MapError::InvalidKeySize { size, expected });
+    }
+    let size = mem::size_of::<V>();
+    let expected = map.obj.value_size() as usize;
+    if size != expected {
+        return Err(MapError::InvalidValueSize { size, expected });
+    };
+    Ok(())
+}
+
+macro_rules! impl_try_from_map_generic_key_value {
+    ($($ty:ident),+ $(,)?) => {
+        $(
+            impl<'a,K:Pod, V:Pod> TryFrom<&'a Map> for &'a $ty<K,V> {
+                type Error = MapError;
+
+                fn try_from(map: &'a Map) -> Result<&'a $ty<K,V>, MapError> {
+                    match map {
+                        Map::$ty(m) => {
+                                let max_entries = map.max_entries();
+                                check_kv_size::<K,V>(m)?;
+                                let fd = map.fd_or_err()?;
+
+                                Ok(&$ty {
+                                    fd,
+                                    max_entries, 
+                                    _k: PhantomData,
+                                    _v: PhantomData,
+                                })
+                        },
+                        _ => Err(MapError::UnexpectedMapType),
+                    }
+                }
+            }
+
+            impl<'a,K: Pod, V: Pod> TryFrom<&'a mut Map> for &'a mut $ty<K,V> {
+                type Error = MapError;
+
+                fn try_from(map: &'a mut Map) -> Result<&'a mut $ty<K,V>, MapError> {
+                    match map {
+                        Map::$ty(m) => {
+                                let max_entries = map.max_entries();
+                                check_kv_size::<K,V>(m)?;
+                                let _fd = map.fd_or_err()?;
+
+                                Ok(&mut $ty {
+                                    fd: m.fd_or_err()?,
+                                    max_entries, 
+                                    _k: PhantomData,
+                                    _v: PhantomData,
+                                })
+                        },
+                        _ => Err(MapError::UnexpectedMapType),
+                    }
+                }
+            }
+        )+
+    }
+}
+
+impl_try_from_map_generic_key_value!(
+    HashMap,
+    PerCpuHashMap,
+    LpmTrie,
+);
+
 
 /// A generic handle to a BPF map.
 ///
 /// You should never need to use this unless you're implementing a new map type.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MapData {
     pub(crate) obj: obj::Map,
     pub(crate) fd: Option<RawFd>,
@@ -508,24 +764,23 @@ impl Drop for MapData {
 
 /// An iterable map
 pub trait IterableMap<K: Pod, V> {
-    /// Get a generic map handle
-    fn map(&self) -> &MapData;
-
+    /// Get a generic fd handle
+    fn fd(&self) -> &RawFd;
     /// Get the value for the provided `key`
     fn get(&self, key: &K) -> Result<V, MapError>;
 }
 
 /// Iterator returned by `map.keys()`.
 pub struct MapKeys<'coll, K: Pod> {
-    map: &'coll MapData,
+    fd: &'coll RawFd,
     err: bool,
     key: Option<K>,
 }
 
 impl<'coll, K: Pod> MapKeys<'coll, K> {
-    fn new(map: &'coll MapData) -> MapKeys<'coll, K> {
+    fn new(fd: &'coll RawFd) -> MapKeys<'coll, K> {
         MapKeys {
-            map,
+            fd,
             err: false,
             key: None,
         }
@@ -540,15 +795,7 @@ impl<K: Pod> Iterator for MapKeys<'_, K> {
             return None;
         }
 
-        let fd = match self.map.fd_or_err() {
-            Ok(fd) => fd,
-            Err(e) => {
-                self.err = true;
-                return Some(Err(e));
-            }
-        };
-
-        match bpf_map_get_next_key(fd, self.key.as_ref()) {
+        match bpf_map_get_next_key(*self.fd, self.key.as_ref()) {
             Ok(Some(key)) => {
                 self.key = Some(key);
                 Some(Ok(key))
@@ -571,15 +818,15 @@ impl<K: Pod> Iterator for MapKeys<'_, K> {
 /// Iterator returned by `map.iter()`.
 pub struct MapIter<'coll, K: Pod, V, I: IterableMap<K, V>> {
     keys: MapKeys<'coll, K>,
-    map: &'coll I,
+    fd: &'coll I,
     _v: PhantomData<V>,
 }
 
 impl<'coll, K: Pod, V, I: IterableMap<K, V>> MapIter<'coll, K, V, I> {
-    fn new(map: &'coll I) -> MapIter<'coll, K, V, I> {
+    fn new(fd: &'coll I) -> MapIter<'coll, K, V, I> {
         MapIter {
-            keys: MapKeys::new(map.map()),
-            map,
+            keys: MapKeys::new(fd.fd()),
+            fd,
             _v: PhantomData,
         }
     }
@@ -591,7 +838,7 @@ impl<K: Pod, V, I: IterableMap<K, V>> Iterator for MapIter<'_, K, V, I> {
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             match self.keys.next() {
-                Some(Ok(key)) => match self.map.get(&key) {
+                Some(Ok(key)) => match self.fd.get(&key) {
                     Ok(value) => return Some(Ok((key, value))),
                     Err(MapError::KeyNotFound) => continue,
                     Err(e) => return Some(Err(e)),

@@ -1,15 +1,14 @@
 //! A Bloom Filter.
-use std::{marker::PhantomData, ops::Deref};
-
-use core::mem;
+use std::{
+    marker::PhantomData, 
+    os::unix::prelude::RawFd
+};
 
 use crate::{
     maps::MapError,
     sys::{bpf_map_lookup_elem_ptr, bpf_map_push_elem},
     Pod,
 };
-
-use super::MapData;
 
 /// A Bloom Filter.
 ///
@@ -35,29 +34,16 @@ use super::MapData;
 
 #[doc(alias = "BPF_MAP_TYPE_BLOOM_FILTER")]
 pub struct BloomFilter<V: Pod> {
-    data: MapData,
+    fd: RawFd,
+    max_entries: u32,
     _v: PhantomData<V>,
 }
 
 impl<V: Pod> BloomFilter<V> {
-    pub(crate) fn new(map: MapData) -> Result<BloomFilter<V>, MapError> {
-        let size = mem::size_of::<V>();
-        let expected = map.obj.value_size() as usize;
-        if size != expected {
-            return Err(MapError::InvalidValueSize { size, expected });
-        };
-
-        let _ = map.fd_or_err()?;
-
-        Ok(BloomFilter {
-            data: map,
-            _v: PhantomData,
-        })
-    }
 
     /// Query the existence of the element.
     pub fn contains(&self, mut value: &V, flags: u64) -> Result<(), MapError> {
-        let fd = self.data.deref().fd_or_err()?;
+        let fd = self.fd;
 
         bpf_map_lookup_elem_ptr::<u32, _>(fd, None, &mut value, flags)
             .map_err(|(_, io_error)| MapError::SyscallError {
@@ -70,7 +56,7 @@ impl<V: Pod> BloomFilter<V> {
 
     /// Inserts a value into the map.
     pub fn insert(&self, value: V, flags: u64) -> Result<(), MapError> {
-        let fd = self.data.deref().fd_or_err()?;
+        let fd = self.fd;
         bpf_map_push_elem(fd, &value, flags).map_err(|(_, io_error)| MapError::SyscallError {
             call: "bpf_map_push_elem".to_owned(),
             io_error,

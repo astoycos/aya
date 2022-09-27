@@ -25,7 +25,8 @@ use crate::{
 /// See the [`PerfEventArray` documentation](PerfEventArray) for an overview of how to use
 /// perf buffers.
 pub struct PerfEventArrayBuffer {
-    data: Arc<MapData>,
+    fd: Arc<RawFd>,
+    max_entries: Arc<u32>,
     buf: PerfBuffer,
 }
 
@@ -52,7 +53,7 @@ impl PerfEventArrayBuffer {
         self.buf.read_events(out_bufs)
     }
 
-    fn as_raw_fd(&self) -> RawFd {
+    pub(crate) fn as_raw_fd(&self) -> RawFd {
         self.buf.as_raw_fd()
     }
 }
@@ -152,20 +153,12 @@ impl PerfEventArrayBuffer {
 /// [async-std]: https://docs.rs/async-std
 #[doc(alias = "BPF_MAP_TYPE_PERF_EVENT_ARRAY")]
 pub struct PerfEventArray {
-    data: Arc<MapData>,
+    fd: Arc<RawFd>,
+    max_entries: Arc<u32>,
     page_size: usize,
 }
 
 impl PerfEventArray {
-    pub(crate) fn new(map: MapData) -> Result<PerfEventArray, MapError> {
-        let _fd = map.fd_or_err()?;
-
-        Ok(PerfEventArray {
-            data: Arc::new(map),
-            page_size: page_size(),
-        })
-    }
-
     /// Opens the perf buffer at the given index.
     ///
     /// The returned buffer will receive all the events eBPF programs send at the given index.
@@ -177,14 +170,15 @@ impl PerfEventArray {
         // FIXME: keep track of open buffers
 
         // this cannot fail as new() checks that the fd is open
-        let map_fd = self.map.fd_or_err().unwrap();
+        let map_fd = self.fd.as_raw_fd();
         let buf = PerfBuffer::open(index, self.page_size, page_count.unwrap_or(2))?;
         bpf_map_update_elem(map_fd, Some(&index), &buf.as_raw_fd(), 0)
             .map_err(|(_, io_error)| io_error)?;
 
         Ok(PerfEventArrayBuffer {
             buf,
-            data: self.data.clone(),
+            fd: self.fd.clone(),
+            max_entries: self.max_entries,
         })
     }
 }

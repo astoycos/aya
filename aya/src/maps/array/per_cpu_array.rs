@@ -1,6 +1,6 @@
 use std::{
     marker::PhantomData,
-    mem,
+    mem, os::unix::prelude::RawFd,
 };
 
 use crate::{
@@ -49,36 +49,17 @@ use crate::{
 /// ```
 #[doc(alias = "BPF_MAP_TYPE_PERCPU_ARRAY")]
 pub struct PerCpuArray<V: Pod> {
-    data: MapData,
+    fd: RawFd,
+    max_entries: u32,
     _v: PhantomData<V>,
 }
 
 impl<V: Pod> PerCpuArray<V> {
-    fn new(map: MapData) -> Result<PerCpuArray<V>, MapError> {
-        let expected = mem::size_of::<u32>();
-        let size = map.obj.key_size() as usize;
-        if size != expected {
-            return Err(MapError::InvalidKeySize { size, expected });
-        }
-
-        let expected = mem::size_of::<V>();
-        let size = map.obj.value_size() as usize;
-        if size != expected {
-            return Err(MapError::InvalidValueSize { size, expected });
-        }
-        let _fd = map.fd_or_err()?;
-
-        Ok(PerCpuArray {
-            data: map,
-            _v: PhantomData,
-        })
-    }
-
     /// Returns the number of elements in the array.
     ///
     /// This corresponds to the value of `bpf_map_def::max_entries` on the eBPF side.
     pub fn len(&self) -> u32 {
-        self.data.obj.max_entries()
+        self.max_entries
     }
 
     /// Returns a slice of values - one for each CPU - stored at the given index.
@@ -89,7 +70,7 @@ impl<V: Pod> PerCpuArray<V> {
     /// if `bpf_map_lookup_elem` fails.
     pub fn get(&self, index: &u32, flags: u64) -> Result<PerCpuValues<V>, MapError> {
         self.check_bounds(*index)?;
-        let fd = self.data.fd_or_err()?;
+        let fd = self.fd;
 
         let value = bpf_map_lookup_elem_per_cpu(fd, index, flags).map_err(|(_, io_error)| {
             MapError::SyscallError {
@@ -107,8 +88,8 @@ impl<V: Pod> PerCpuArray<V> {
     }
 
     fn check_bounds(&self, index: u32) -> Result<(), MapError> {
-        let max_entries = self.data.obj.max_entries();
-        if index >= self.data.obj.max_entries() {
+        let max_entries = self.max_entries;
+        if index >= max_entries {
             Err(MapError::OutOfBounds { index, max_entries })
         } else {
             Ok(())
@@ -122,7 +103,7 @@ impl<V: Pod> PerCpuArray<V> {
     /// Returns [`MapError::OutOfBounds`] if `index` is out of bounds, [`MapError::SyscallError`]
     /// if `bpf_map_update_elem` fails.
     pub fn set(&mut self, index: u32, values: PerCpuValues<V>, flags: u64) -> Result<(), MapError> {
-        let fd = self.data.fd_or_err()?;
+        let fd = self.fd;
         self.check_bounds(index)?;
         bpf_map_update_elem_per_cpu(fd, &index, &values, flags).map_err(|(_, io_error)| {
             MapError::SyscallError {
@@ -132,9 +113,4 @@ impl<V: Pod> PerCpuArray<V> {
         })?;
         Ok(())
     }
-
-    fn map(&self) -> &MapData {
-        &self.data
-    }
-
 }
