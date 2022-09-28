@@ -356,7 +356,7 @@ impl Map {
     }
 
     /// Returns if a given map is empty
-    pub fn max_entries(&self) -> u32 { 
+    pub fn max_entries(self) -> u32 { 
         match self {
             Map::Array(m) => m.obj.max_entries(),
             Map::PerCpuArray(m) => m.obj.max_entries(),
@@ -374,7 +374,7 @@ impl Map {
         }
     }
 
-    pub fn fixed_key_size(&self) -> Option<usize> {
+    pub fn fixed_key_size(self) -> Option<usize> {
         match self {
             Map::Array(_) => Some(mem::size_of::<u32>()),
             Map::PerCpuArray(_) => Some(mem::size_of::<u32>()),
@@ -391,6 +391,43 @@ impl Map {
             _ => None
         }
     }
+
+    // /// Returns if a given map is empty
+    // pub fn max_entries_mut(&mut self) -> u32 { 
+    //     match self {
+    //         Map::Array(m) => m.obj.max_entries(),
+    //         Map::PerCpuArray(m) => m.obj.max_entries(),
+    //         Map::ProgramArray(m) => m.obj.max_entries(),
+    //         Map::HashMap(m) => m.obj.max_entries(),
+    //         Map::PerCpuHashMap(m) => m.obj.max_entries(),
+    //         Map::PerfEventArray(m) => m.obj.max_entries(),
+    //         Map::SockMap(m) => m.obj.max_entries(),
+    //         Map::SockHash(m) => m.obj.max_entries(),
+    //         Map::BloomFilter(m) => m.obj.max_entries(),
+    //         Map::LpmTrie(m) => m.obj.max_entries(),
+    //         Map::Stack(m) => m.obj.max_entries(),
+    //         Map::StackTrace(m) => m.obj.max_entries(),
+    //         Map::Queue(m) => m.obj.max_entries(),
+    //     }
+    // }
+
+    // pub fn fixed_key_size_mut(&mut self) -> Option<usize> {
+    //     match self {
+    //         Map::Array(_) => Some(mem::size_of::<u32>()),
+    //         Map::PerCpuArray(_) => Some(mem::size_of::<u32>()),
+    //         Map::ProgramArray(_) => Some(mem::size_of::<u32>()),
+    //         Map::SockMap(_) => Some(mem::size_of::<u32>()),
+    //         _ => None
+    //     }
+    // }
+
+    // pub fn fixed_value_size_mut(&mut self) -> Option<usize> {
+    //     match self {
+    //         Map::SockMap(_) => Some(mem::size_of::<RawFd>()),
+    //         Map::SockHash(_) => Some(mem::size_of::<u32>()),
+    //         _ => None
+    //     }
+    // }
 }
 
 pub(crate) fn check_fixed_key_value_size(key_size: usize, value_size: usize, map: &MapData) -> Result<(), MapError> {
@@ -410,10 +447,10 @@ pub(crate) fn check_fixed_key_value_size(key_size: usize, value_size: usize, map
 macro_rules! impl_try_from_map {
     ($($ty:ident),+ $(,)?) => {
         $(
-            impl<'a> TryFrom<&'a Map> for &'a $ty {
+            impl<'a> TryFrom<&'a Map> for $ty {
                 type Error = MapError;
                 
-                fn try_from(map: &'a Map) -> Result<&'a $ty, MapError> {
+                fn try_from(map: &'a Map) -> Result<$ty, MapError> {
                     match map {
                         Map::$ty(m) => {
                                 let max_entries = map.max_entries();
@@ -432,10 +469,10 @@ macro_rules! impl_try_from_map {
                 }
             }
 
-            impl<'a> TryFrom<&'a mut Map> for &'a mut $ty {
+            impl<'a> TryFrom<&'a mut Map> for $ty {
                 type Error = MapError;
 
-                fn try_from(map: &'a mut  Map) -> Result<&'a mut $ty, MapError> {
+                fn try_from(map: &'a mut  Map) -> Result<$ty, MapError> {
                     match map {
                         Map::$ty(m) => {
                             let max_entries = map.max_entries();
@@ -444,7 +481,7 @@ macro_rules! impl_try_from_map {
                             check_fixed_key_value_size(key_size,value_size, m)?;
                             let fd = m.fd_or_err()?;
 
-                            Ok(&mut $ty {
+                            Ok($ty {
                                 fd,
                                 max_entries 
                             })
@@ -491,7 +528,7 @@ macro_rules! impl_try_from_map_generic_value {
                                 check_value_size::<V>(key_size, m)?;
                                 let fd = map.fd_or_err()?;
 
-                                Ok(&$ty {
+                                Ok(&$ty::<V> {
                                     fd: fd.to_owned(),
                                     max_entries, 
                                     _v: PhantomData,

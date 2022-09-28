@@ -178,7 +178,7 @@ impl PerfEventArray {
         Ok(PerfEventArrayBuffer {
             buf,
             fd: self.fd.clone(),
-            max_entries: self.max_entries,
+            max_entries: self.max_entries.clone(),
         })
     }
 }
