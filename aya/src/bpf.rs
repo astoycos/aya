@@ -876,7 +876,7 @@ pub enum BpfError {
     #[error("no BTF parsed for object")]
     NoBTF,
 
-    #[error("map error")]
+    #[error("map error: {0}")]
     /// A map error
     MapError(#[from] MapError),
 
