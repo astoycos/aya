@@ -1095,16 +1095,8 @@ impl ProgramInfo {
 
     /// Returns the program type.
     pub fn prog_type(&self) -> Result<bpf_prog_type, ProgramError> {
-        self.0.type_.try_into()
-    }
-}
-
-impl TryFrom<u32> for bpf_prog_type {
-    type Error = ProgramError;
-
-    fn try_from(v: u32) -> Result<Self, Self::Error> {
         use bpf_prog_type::*;
-        let type_ = match v {
+        let type_ = match self.0.type_ {
             0 => BPF_PROG_TYPE_UNSPEC,
             1 => BPF_PROG_TYPE_SOCKET_FILTER,
             2 => BPF_PROG_TYPE_KPROBE,
