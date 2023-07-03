@@ -107,6 +107,7 @@ use crate::{
     maps::MapError,
     obj::{self, btf::BtfError, Function, KernelVersion},
     pin::PinError,
+    programs::utils::{get_fdinfo, print_load_time},
     sys::{
         bpf_btf_get_fd_by_id, bpf_get_object, bpf_load_program, bpf_pin_object,
         bpf_prog_get_fd_by_id, bpf_prog_get_info_by_fd, bpf_prog_get_next_id, bpf_prog_query,
@@ -491,10 +492,11 @@ impl<T: Link> ProgramData<T> {
                 io_error,
             })? as RawFd;
 
-        let info = bpf_prog_get_info_by_fd(fd).map_err(|io_error| ProgramError::SyscallError {
-            call: "bpf_prog_get_info_by_fd".to_owned(),
-            io_error,
-        })?;
+        let info =
+            bpf_prog_get_info_by_fd(fd, None).map_err(|io_error| ProgramError::SyscallError {
+                call: "bpf_prog_get_info_by_fd".to_owned(),
+                io_error,
+            })?;
 
         let info = ProgramInfo(info);
         let name = info.name_as_str().map(|s| s.to_string());
@@ -932,7 +934,7 @@ impl ProgramInfo {
         unsafe { std::slice::from_raw_parts(self.0.name.as_ptr() as *const _, length) }
     }
 
-    /// The name of the program as a &str. If the name was not valid unicode, None is returned
+    /// The name of the program as a &str. If the name was not valid unicode, None is returned.
     pub fn name_as_str(&self) -> Option<&str> {
         std::str::from_utf8(self.name()).ok()
     }
@@ -940,6 +942,75 @@ impl ProgramInfo {
     /// The program id for this program. Each program has a unique id.
     pub fn id(&self) -> u32 {
         self.0.id
+    }
+
+    /// The program tag.
+    pub fn tag(&self) -> &[u8] {
+        &self.0.tag
+    }
+
+    /// The tag of the program as a &str.
+    pub fn tag_as_str(&self) -> String {
+        format!("{:x?}", self.tag())
+    }
+
+    /// The program type as an integer.
+    pub fn program_type(&self) -> u32 {
+        self.0.type_
+    }
+
+    /// Returns true if the program is GPL compatible.
+    pub fn gpl_compatible(&self) -> bool {
+        self.0.gpl_compatible() != 0
+    }
+
+    /// Returns the map ids used by the program.
+    pub fn map_ids(&self) -> Result<Vec<u32>, ProgramError> {
+        let fd = self.fd()?;
+
+        let len = self.0.nr_map_ids;
+        let mut map_ids = vec![0u32; len as usize];
+
+        bpf_prog_get_info_by_fd(fd, Some(&mut map_ids)).map_err(|io_error| {
+            ProgramError::SyscallError {
+                call: "bpf_prog_get_info_by_fd".to_owned(),
+                io_error,
+            }
+        })?;
+
+        Ok(map_ids)
+    }
+
+    /// The btf id for the program.
+    pub fn btf_id(&self) -> u32 {
+        self.0.btf_id
+    }
+
+    /// The size in bytes of the program's bpf bytecode.
+    pub fn bytes_xlated(&self) -> u32 {
+        self.0.xlated_prog_len
+    }
+
+    /// The size in bytes of the program's ASM.
+    pub fn bytes_jitted(&self) -> u32 {
+        self.0.jited_prog_len
+    }
+
+    /// How much memory in bytes has been allocated and locked for the program.
+    pub fn bytes_memlock(&self) -> Result<u32, ProgramError> {
+        let fd = self.fd()?;
+
+        get_fdinfo(fd, "bytes_memlock")
+    }
+
+    /// The number of verified instructions in the program.
+    pub fn verified_insns(&self) -> u32 {
+        self.0.verified_insns
+    }
+
+    /// The time the program was loaded.
+    pub fn loaded_at_as_string(&self) -> String {
+        print_load_time(self.0.load_time)
     }
 
     /// Returns the fd associated with the program.
@@ -963,10 +1034,11 @@ impl ProgramInfo {
                 io_error,
             })? as RawFd;
 
-        let info = bpf_prog_get_info_by_fd(fd).map_err(|io_error| ProgramError::SyscallError {
-            call: "bpf_prog_get_info_by_fd".to_owned(),
-            io_error,
-        })?;
+        let info =
+            bpf_prog_get_info_by_fd(fd, None).map_err(|io_error| ProgramError::SyscallError {
+                call: "bpf_prog_get_info_by_fd".to_owned(),
+                io_error,
+            })?;
         unsafe {
             libc::close(fd);
         }
@@ -999,7 +1071,7 @@ impl Iterator for ProgramsIter {
                             io_error,
                         })
                         .and_then(|fd| {
-                            bpf_prog_get_info_by_fd(fd)
+                            bpf_prog_get_info_by_fd(fd, None)
                                 .map_err(|io_error| ProgramError::SyscallError {
                                     call: "bpf_prog_get_info_by_fd".to_owned(),
                                     io_error,
