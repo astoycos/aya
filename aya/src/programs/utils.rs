@@ -1,5 +1,13 @@
 //! Common functions shared between multiple eBPF program types.
-use std::{ffi::CStr, io, os::unix::io::RawFd, path::Path};
+use std::{
+    ffi::CStr,
+    fs::File,
+    io,
+    io::{BufRead, BufReader},
+    os::unix::io::RawFd,
+    path::Path,
+    time::Duration,
+};
 
 use crate::{
     programs::{FdLink, Link, ProgramData, ProgramError},
@@ -23,7 +31,7 @@ pub(crate) fn attach_raw_tracepoint<T: Link + From<FdLink>>(
     program_data.links.insert(FdLink::new(pfd).into())
 }
 
-/// Find tracefs filesystem path
+/// Find tracefs filesystem path.
 pub(crate) fn find_tracefs_path() -> Result<&'static Path, ProgramError> {
     lazy_static::lazy_static! {
         static ref TRACE_FS: Option<&'static Path> = {
@@ -50,4 +58,53 @@ pub(crate) fn find_tracefs_path() -> Result<&'static Path, ProgramError> {
     TRACE_FS
         .as_deref()
         .ok_or_else(|| io::Error::new(io::ErrorKind::Other, "tracefs not found").into())
+}
+
+// Get time since boot.
+pub(crate) fn time_since_boot() -> Duration {
+    let mut time = libc::timespec {
+        tv_sec: 0,
+        tv_nsec: 0,
+    };
+    let ret = unsafe { libc::clock_gettime(libc::CLOCK_BOOTTIME, &mut time) };
+    assert!(ret == 0);
+    let tv_sec = time.tv_sec as u64;
+    let tv_nsec = time.tv_nsec as u32;
+    Duration::new(tv_sec, tv_nsec)
+}
+
+// Get the realtime.
+pub(crate) fn realtime() -> Duration {
+    let mut time = libc::timespec {
+        tv_sec: 0,
+        tv_nsec: 0,
+    };
+    let ret = unsafe { libc::clock_gettime(libc::CLOCK_REALTIME, &mut time) };
+    assert!(ret == 0);
+    let tv_sec = time.tv_sec as u64;
+    let tv_nsec = time.tv_nsec as u32;
+    Duration::new(tv_sec, tv_nsec)
+}
+
+/// Get the specified information from a file descriptor's fdinfo.
+pub(crate) fn get_fdinfo(fd: RawFd, key: &str) -> Result<u32, ProgramError> {
+    let info = File::open(format!("/proc/self/fdinfo/{}", fd))?;
+    let reader = BufReader::new(info);
+    let mut key_val = Ok(0);
+    for line in reader.lines() {
+        match line {
+            Ok(l) => {
+                if !l.contains(key) {
+                    continue;
+                }
+
+                let parts = l.split('\t');
+
+                key_val = Ok(parts.last().unwrap_or("err").parse().unwrap_or(0));
+            }
+            Err(e) => return Err(ProgramError::IOError(e)),
+        }
+    }
+
+    key_val
 }
