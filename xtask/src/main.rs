@@ -22,6 +22,7 @@ enum Subcommand {
     BuildIntegrationTest(run::BuildOptions),
     IntegrationTest(run::Options),
     PublicApi(public_api::Options),
+    Preflight,
 }
 
 fn main() -> Result<()> {
@@ -58,5 +59,6 @@ fn main() -> Result<()> {
         }
         Subcommand::IntegrationTest(opts) => run::run(opts),
         Subcommand::PublicApi(opts) => public_api::public_api(opts, metadata),
+        Subcommand::Preflight => run::preflight_checks(),
     }
 }

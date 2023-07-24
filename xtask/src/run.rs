@@ -131,3 +131,42 @@ pub fn run(opts: Options) -> Result<()> {
         Err(anyhow::anyhow!("failures:\n{}", failures))
     }
 }
+
+/// Run checks that are automated in github actions "lint" workflow.
+pub fn preflight_checks() -> Result<()> {
+    Command::new("cargo")
+        .args(["fmt", "--all", "--", "--check"])
+        .status()?;
+
+    Command::new("cargo")
+        .args([
+            "hack",
+            "clippy",
+            "--all-targets",
+            "--feature-powerset",
+            "--workspace",
+            "--",
+            "--deny",
+            "warnings",
+        ])
+        .status()?;
+
+    Command::new("cargo")
+        .args([
+            "hack",
+            "miri",
+            "test",
+            "--all-targets",
+            "--feature-powerset",
+            "--exclude", "aya-bpf",
+            "--exclude", "aya-bpf-bindings",
+            "--exclude", "aya-log-ebpf",
+            "--exclude", "integration-ebpf",
+            "--exclude", "integration-test",
+            "--workspace",
+        ])
+        .status()?;
+
+    
+    Ok(())
+}
