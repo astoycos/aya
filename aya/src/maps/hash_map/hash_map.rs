@@ -147,6 +147,8 @@ mod tests {
             obj: new_obj_map(),
             fd: None,
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         assert_matches!(
             HashMap::<_, u8, u32>::new(&map),
@@ -163,6 +165,8 @@ mod tests {
             obj: new_obj_map(),
             fd: None,
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         assert_matches!(
             HashMap::<_, u32, u16>::new(&map),
@@ -179,6 +183,8 @@ mod tests {
             obj: new_obj_map(),
             fd: None,
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         let map = Map::Array(map_data);
@@ -194,6 +200,8 @@ mod tests {
             obj: new_obj_map(),
             fd: None,
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         let map = Map::HashMap(map_data);
@@ -212,6 +220,8 @@ mod tests {
             obj: new_obj_map(),
             fd: None,
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         assert_matches!(
@@ -226,6 +236,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         assert!(HashMap::<_, u32, u32>::new(&mut map).is_ok());
@@ -237,6 +249,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         let map = Map::HashMap(map_data);
@@ -261,6 +275,8 @@ mod tests {
             }),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         let map = Map::HashMap(map_data);
@@ -276,6 +292,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let mut hm = HashMap::<_, u32, u32>::new(&mut map).unwrap();
 
@@ -299,6 +317,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let mut hm = HashMap::<_, u32, u32>::new(&mut map).unwrap();
 
@@ -319,6 +339,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let mut hm = HashMap::<_, u32, u32>::new(&mut map).unwrap();
 
@@ -333,6 +355,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let mut hm = HashMap::<_, u32, u32>::new(&mut map).unwrap();
 
@@ -356,6 +380,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let mut hm = HashMap::<_, u32, u32>::new(&mut map).unwrap();
 
@@ -369,6 +395,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let hm = HashMap::<_, u32, u32>::new(&map).unwrap();
 
@@ -391,6 +419,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let hm = HashMap::<_, u32, u32>::new(&map).unwrap();
 
@@ -427,6 +457,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let hm = HashMap::<_, u32, u32>::new(&map).unwrap();
         let keys = hm.keys().collect::<Result<Vec<_>, _>>();
@@ -475,6 +507,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let hm = HashMap::<_, u32, u32>::new(&map).unwrap();
 
@@ -507,6 +541,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let hm = HashMap::<_, u32, u32>::new(&map).unwrap();
 
@@ -544,6 +580,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let hm = HashMap::<_, u32, u32>::new(&map).unwrap();
         let items = hm.iter().collect::<Result<Vec<_>, _>>().unwrap();
@@ -581,6 +619,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let hm = HashMap::<_, u32, u32>::new(&map).unwrap();
 
@@ -619,6 +659,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let hm = HashMap::<_, u32, u32>::new(&map).unwrap();
 
@@ -666,6 +708,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let hm = HashMap::<_, u32, u32>::new(&map).unwrap();
 

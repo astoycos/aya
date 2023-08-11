@@ -397,7 +397,7 @@ impl<'a> BpfLoader<'a> {
             if let Some(btf) = obj.fixup_and_sanitize_btf(features)? {
                 match load_btf(btf.to_bytes(), *verifier_log_level) {
                     Ok(btf_fd) => Some(Arc::new(btf_fd)),
-                    // Only report an error here if the BTF is truely needed, otherwise proceed without.
+                    // Only report an error here if the BTF is truly needed, otherwise proceed without.
                     Err(err) => {
                         for program in obj.programs.values() {
                             match program.section {
@@ -450,7 +450,7 @@ impl<'a> BpfLoader<'a> {
         if let Some(btf) = &btf {
             obj.relocate_btf(btf)?;
         }
-        let mut maps = HashMap::new();
+        let mut maps: HashMap<String, MapData> = HashMap::new();
         for (name, mut obj) in obj.maps.drain() {
             if let (false, BpfSectionKind::Bss | BpfSectionKind::Data | BpfSectionKind::Rodata) =
                 (FEATURES.bpf_global_data(), obj.section_kind())
@@ -479,32 +479,32 @@ impl<'a> BpfLoader<'a> {
                 obj,
                 fd: None,
                 pinned: false,
+                path: None,
+                name: name.clone(),
             };
             let fd = match map.obj.pinning() {
                 PinningType::ByName => {
-                    let path = match &map_pin_path {
-                        Some(p) => p.to_owned(),
-                        // pin maps in /sys/fs/bpf by default to align with libbpf
-                        // behavior https://github.com/libbpf/libbpf/blob/v1.2.2/src/libbpf.c#L2161
-                        None => PathBuf::from("/sys/fs/bpf"),
-                    };
+                    let path = map_pin_path
+                        .clone()
+                        .unwrap_or(PathBuf::from("/sys/fs/bpf"))
+                        .join(map.name.clone());
                     // try to open map in case it's already pinned
-                    match map.open_pinned(&name, path.clone()) {
+                    match map.open_pinned(path.clone()) {
                         Ok(fd) => {
                             map.pinned = true;
                             fd as RawFd
                         }
                         Err(_) => {
-                            let fd = map.create(&name, btf_fd.as_deref().map(|f| f.as_fd()))?;
-                            map.pin(&name, path).map_err(|error| MapError::PinError {
-                                name: Some(name.to_string()),
+                            let fd = map.create(btf_fd.as_deref().map(|f| f.as_fd()))?;
+                            map.pin(path).map_err(|error| MapError::PinError {
+                                name: Some(map.name.to_string()),
                                 error,
                             })?;
                             fd
                         }
                     }
                 }
-                PinningType::None => map.create(&name, btf_fd.as_deref().map(|f| f.as_fd()))?,
+                PinningType::None => map.create(btf_fd.as_deref().map(|f| f.as_fd()))?,
             };
             if !map.obj.data().is_empty() && map.obj.section_kind() != BpfSectionKind::Bss {
                 bpf_map_update_elem_ptr(fd, &0 as *const _, map.obj.data_mut().as_mut_ptr(), 0)
@@ -874,6 +874,21 @@ impl Bpf {
     /// ```
     pub fn maps(&self) -> impl Iterator<Item = (&str, &Map)> {
         self.maps.iter().map(|(name, map)| (name.as_str(), map))
+    }
+
+    /// An iterator mutable referencing all the maps.
+    ///
+    /// # Examples
+    /// ```no_run
+    /// # let mut bpf = aya::Bpf::load(&[])?;
+    /// # let pin_path = Path::new("/tmp/pin_path");
+    /// for (_, map) in bpf.maps_mut() {
+    ///     map.pin(pin_path)?;
+    /// }
+    /// # Ok::<(), aya::BpfError>(())
+    /// ```
+    pub fn maps_mut(&mut self) -> impl Iterator<Item = (&str, &mut Map)> {
+        self.maps.iter_mut().map(|(name, map)| (name.as_str(), map))
     }
 
     /// Returns a reference to the program with the given name.

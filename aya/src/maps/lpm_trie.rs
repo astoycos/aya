@@ -210,7 +210,7 @@ mod tests {
     };
     use assert_matches::assert_matches;
     use libc::{EFAULT, ENOENT};
-    use std::{ffi::c_long, io, mem, net::Ipv4Addr};
+    use std::{ffi::c_long, io, mem, net::Ipv4Addr, str::FromStr};
 
     fn new_obj_map() -> obj::Map {
         obj::Map::Legacy(LegacyMap {
@@ -238,6 +238,8 @@ mod tests {
             obj: new_obj_map(),
             fd: None,
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         assert_matches!(
             LpmTrie::<_, u16, u32>::new(&map),
@@ -254,6 +256,8 @@ mod tests {
             obj: new_obj_map(),
             fd: None,
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         assert_matches!(
             LpmTrie::<_, u32, u16>::new(&map),
@@ -282,6 +286,8 @@ mod tests {
             }),
             fd: None,
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         let map = Map::PerfEventArray(map_data);
@@ -298,6 +304,8 @@ mod tests {
             obj: new_obj_map(),
             fd: None,
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         assert_matches!(
@@ -312,6 +320,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         assert!(LpmTrie::<_, u32, u32>::new(&mut map).is_ok());
@@ -323,6 +333,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         let map = Map::LpmTrie(map_data);
@@ -337,6 +349,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let mut trie = LpmTrie::<_, u32, u32>::new(&mut map).unwrap();
         let ipaddr = Ipv4Addr::new(8, 8, 8, 8);
@@ -361,6 +375,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         let mut trie = LpmTrie::<_, u32, u32>::new(&mut map).unwrap();
@@ -377,6 +393,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let mut trie = LpmTrie::<_, u32, u32>::new(&mut map).unwrap();
         let ipaddr = Ipv4Addr::new(8, 8, 8, 8);
@@ -401,6 +419,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let mut trie = LpmTrie::<_, u32, u32>::new(&mut map).unwrap();
         let ipaddr = Ipv4Addr::new(8, 8, 8, 8);
@@ -415,6 +435,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let trie = LpmTrie::<_, u32, u32>::new(&map).unwrap();
         let ipaddr = Ipv4Addr::new(8, 8, 8, 8);
@@ -439,6 +461,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let trie = LpmTrie::<_, u32, u32>::new(&map).unwrap();
         let ipaddr = Ipv4Addr::new(8, 8, 8, 8);

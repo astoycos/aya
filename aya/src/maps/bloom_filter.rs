@@ -116,6 +116,8 @@ mod tests {
             obj: new_obj_map(),
             fd: None,
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         assert_matches!(
             BloomFilter::<_, u16>::new(&map),
@@ -144,6 +146,8 @@ mod tests {
             }),
             fd: None,
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         let map = Map::PerfEventArray(map_data);
@@ -160,6 +164,8 @@ mod tests {
             obj: new_obj_map(),
             fd: None,
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         assert_matches!(
@@ -174,6 +180,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         assert!(BloomFilter::<_, u32>::new(&mut map).is_ok());
@@ -185,6 +193,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         let map = Map::BloomFilter(map_data);
@@ -199,6 +209,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let bloom_filter = BloomFilter::<_, u32>::new(&mut map).unwrap();
 
@@ -222,6 +234,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
 
         let bloom_filter = BloomFilter::<_, u32>::new(&mut map).unwrap();
@@ -235,6 +249,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let bloom_filter = BloomFilter::<_, u32>::new(&map).unwrap();
 
@@ -257,6 +273,8 @@ mod tests {
             obj: new_obj_map(),
             fd: Some(42),
             pinned: false,
+            path: None,
+            name: String::from(""),
         };
         let bloom_filter = BloomFilter::<_, u32>::new(&map).unwrap();
 

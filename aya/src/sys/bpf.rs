@@ -735,9 +735,11 @@ pub(crate) fn is_bpf_global_data_supported() -> bool {
         }),
         fd: None,
         pinned: false,
+        path: None,
+        name: String::from("aya_global"),
     };
 
-    if let Ok(map_fd) = map_data.create("aya_global", None) {
+    if let Ok(map_fd) = map_data.create(None) {
         insns[0].imm = map_fd;
 
         let gpl = b"GPL\0";

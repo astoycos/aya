@@ -43,7 +43,7 @@ use std::{
     mem,
     ops::Deref,
     os::fd::{AsFd as _, AsRawFd, BorrowedFd, IntoRawFd as _, OwnedFd, RawFd},
-    path::Path,
+    path::{Path, PathBuf},
     ptr,
 };
 
@@ -290,6 +290,33 @@ impl Map {
             Map::Unsupported(map) => map.obj.map_type(),
         }
     }
+
+    /// Pins the map to a BPF filesystem.
+    ///
+    /// When a BPF map is pinned to a BPF filesystem it will remain loaded after
+    /// Aya has unloaded the program.
+    /// To remove the map, the file on the BPF filesystem must be removed.
+    /// Any directories in the the path provided should have been created by the caller.
+    pub fn pin<P: AsRef<Path>>(&mut self, path: P) -> Result<(), PinError> {
+        match self {
+            Map::Array(map) => map.pin(path),
+            Map::PerCpuArray(map) => map.pin(path),
+            Map::ProgramArray(map) => map.pin(path),
+            Map::HashMap(map) => map.pin(path),
+            Map::LruHashMap(map) => map.pin(path),
+            Map::PerCpuHashMap(map) => map.pin(path),
+            Map::PerCpuLruHashMap(map) => map.pin(path),
+            Map::PerfEventArray(map) => map.pin(path),
+            Map::SockHash(map) => map.pin(path),
+            Map::SockMap(map) => map.pin(path),
+            Map::BloomFilter(map) => map.pin(path),
+            Map::LpmTrie(map) => map.pin(path),
+            Map::Stack(map) => map.pin(path),
+            Map::StackTraceMap(map) => map.pin(path),
+            Map::Queue(map) => map.pin(path),
+            Map::Unsupported(map) => map.pin(path),
+        }
+    }
 }
 
 macro_rules! impl_try_from_map {
@@ -442,6 +469,52 @@ macro_rules! impl_try_from_map_generic_key_and_value {
 
 impl_try_from_map_generic_key_and_value!(HashMap, PerCpuHashMap, LpmTrie);
 
+// macro_rules! impl_map_pin{
+//     ($($struct_name:ident),+ $(,)?) => {
+//         $(
+//             impl $struct_name {
+//                 /// Pins the map to a BPF filesystem.
+//                 ///
+//                 /// When a BPF map is pinned to a BPF filesystem it will remain loaded after
+//                 /// Aya has unloaded the program.
+//                 /// To remove the map, the file on the BPF filesystem must be removed.
+//                 /// Any directories in the the path provided should have been created by the caller.
+//                 pub fn pin<P: AsRef<Path>>(&mut self, path: P) -> Result<(), PinError> {
+//                     self.data.path = Some(path.as_ref().to_path_buf());
+//                     self.data.pin()
+//                 }
+
+//                 /// Removes the pinned map from the filesystem.
+//                 pub fn unpin(mut self) -> Result<(), io::Error> {
+//                     if let Some(path) = self.data.path.take() {
+//                         std::fs::remove_file(path)?;
+//                     }
+//                     Ok(())
+//                 }
+//             }
+//         )+
+//     }
+// }
+
+// impl_map_pin!(
+//     Array,
+//     PerCpuArray,
+//     ProgramArray,
+//     HashMap,
+//     PerCpuHashMap,
+//     LruHashMap,
+//     PerCpuLruHashMap,
+//     PerfEventArray,
+//     SockMap,
+//     SockHash,
+//     BloomFilter,
+//     LpmTrie,
+//     Stack,
+//     StackTraceMap,
+//     Queue,
+//     Unsupported,
+// );
+
 pub(crate) fn check_bounds(map: &MapData, index: u32) -> Result<(), MapError> {
     let max_entries = map.obj.max_entries();
     if index >= max_entries {
@@ -482,21 +555,23 @@ pub struct MapData {
     pub(crate) obj: obj::Map,
     pub(crate) fd: Option<RawFd>,
     /// Indicates if this map has been pinned to bpffs
-    pub pinned: bool,
+    pub(crate) pinned: bool,
+    pub(crate) path: Option<PathBuf>,
+    pub(crate) name: String,
 }
 
 impl MapData {
     /// Creates a new map with the provided `name`
-    pub fn create(
-        &mut self,
-        name: &str,
-        btf_fd: Option<BorrowedFd<'_>>,
-    ) -> Result<RawFd, MapError> {
+    pub fn create(&mut self, btf_fd: Option<BorrowedFd<'_>>) -> Result<RawFd, MapError> {
         if self.fd.is_some() {
-            return Err(MapError::AlreadyCreated { name: name.into() });
+            return Err(MapError::AlreadyCreated {
+                name: self.name.clone(),
+            });
         }
 
-        let c_name = CString::new(name).map_err(|_| MapError::InvalidName { name: name.into() })?;
+        let c_name = CString::new(self.name.clone()).map_err(|_| MapError::InvalidName {
+            name: self.name.clone(),
+        })?;
 
         #[cfg(not(test))]
         let kernel_version = KernelVersion::current().unwrap();
@@ -509,7 +584,7 @@ impl MapData {
                 }
 
                 MapError::CreateError {
-                    name: name.into(),
+                    name: self.name.clone(),
                     code,
                     io_error,
                 }
@@ -519,35 +594,36 @@ impl MapData {
         Ok(*self.fd.insert(fd as RawFd))
     }
 
-    pub(crate) fn open_pinned<P: AsRef<Path>>(
-        &mut self,
-        name: &str,
-        path: P,
-    ) -> Result<RawFd, MapError> {
+    pub(crate) fn open_pinned<P: AsRef<Path>>(&mut self, path: P) -> Result<RawFd, MapError> {
         if self.fd.is_some() {
-            return Err(MapError::AlreadyCreated { name: name.into() });
+            return Err(MapError::AlreadyCreated {
+                name: self.name.clone(),
+            });
         }
-        let map_path = path.as_ref().join(name);
+        let map_path = path.as_ref();
         let path_string = CString::new(map_path.to_str().unwrap()).unwrap();
         let fd = bpf_get_object(&path_string).map_err(|(_, io_error)| SyscallError {
             call: "BPF_OBJ_GET",
             io_error,
         })?;
 
+        self.pinned = true;
+        self.path = Some(map_path.to_path_buf());
         Ok(*self.fd.insert(fd.into_raw_fd()))
     }
 
     /// Loads a map from a pinned path in bpffs.
     pub fn from_pin<P: AsRef<Path>>(path: P) -> Result<MapData, MapError> {
-        let path_string =
-            CString::new(path.as_ref().to_string_lossy().into_owned()).map_err(|e| {
-                MapError::PinError {
-                    name: None,
-                    error: PinError::InvalidPinPath {
-                        error: e.to_string(),
-                    },
-                }
-            })?;
+        let map_path = path.as_ref();
+
+        let path_string = CString::new(map_path.to_string_lossy().into_owned()).map_err(|e| {
+            MapError::PinError {
+                name: None,
+                error: PinError::InvalidPinPath {
+                    error: e.to_string(),
+                },
+            }
+        })?;
 
         let fd = bpf_get_object(&path_string).map_err(|(_, io_error)| SyscallError {
             call: "BPF_OBJ_GET",
@@ -556,10 +632,24 @@ impl MapData {
 
         let info = bpf_map_get_info_by_fd(fd.as_fd())?;
 
+        // TODO(astoycos) this needs to go into a function
+        let length = info
+            .name
+            .iter()
+            .rposition(|ch| *ch != 0)
+            .map(|pos| pos + 1)
+            .unwrap_or(0);
+
+        // The name field is defined as [std::os::raw::c_char; 16]. c_char may be signed or
+        // unsigned depending on the platform; that's why we're using from_raw_parts here
+        let name = unsafe { std::slice::from_raw_parts(info.name.as_ptr() as *const _, length) };
+
         Ok(MapData {
             obj: parse_map_info(info, PinningType::ByName),
             fd: Some(fd.into_raw_fd()),
             pinned: true,
+            path: Some(map_path.to_path_buf()),
+            name: std::str::from_utf8(name).ok().unwrap().to_string(),
         })
     }
 
@@ -571,10 +661,24 @@ impl MapData {
     pub fn from_fd(fd: OwnedFd) -> Result<MapData, MapError> {
         let info = bpf_map_get_info_by_fd(fd.as_fd())?;
 
+        // TODO(astoycos) this needs to go into a function
+        let length = info
+            .name
+            .iter()
+            .rposition(|ch| *ch != 0)
+            .map(|pos| pos + 1)
+            .unwrap_or(0);
+
+        // The name field is defined as [std::os::raw::c_char; 16]. c_char may be signed or
+        // unsigned depending on the platform; that's why we're using from_raw_parts here
+        let name = unsafe { std::slice::from_raw_parts(info.name.as_ptr() as *const _, length) };
+
         Ok(MapData {
             obj: parse_map_info(info, PinningType::None),
             fd: Some(fd.into_raw_fd()),
             pinned: false,
+            path: None,
+            name: std::str::from_utf8(name).ok().unwrap().to_string(),
         })
     }
 
@@ -582,13 +686,15 @@ impl MapData {
         self.fd.ok_or(MapError::NotCreated)
     }
 
-    pub(crate) fn pin<P: AsRef<Path>>(&mut self, name: &str, path: P) -> Result<(), PinError> {
+    pub(crate) fn pin<P: AsRef<Path>>(&mut self, path: P) -> Result<(), PinError> {
         if self.pinned {
-            return Err(PinError::AlreadyPinned { name: name.into() });
+            return Err(PinError::AlreadyPinned {
+                name: self.name.clone(),
+            });
         }
-        let map_path = path.as_ref().join(name);
+        let map_path = path.as_ref();
         let fd = self.fd.ok_or(PinError::NoFd {
-            name: name.to_string(),
+            name: self.name.to_string(),
         })?;
         let path_string = CString::new(map_path.to_string_lossy().into_owned()).map_err(|e| {
             PinError::InvalidPinPath {
@@ -600,6 +706,7 @@ impl MapData {
             io_error,
         })?;
         self.pinned = true;
+        self.path = Some(map_path.to_path_buf());
         Ok(())
     }
 
@@ -626,6 +733,8 @@ impl Clone for MapData {
             obj: self.obj.clone(),
             fd: self.fd.map(|fd| unsafe { libc::dup(fd) }),
             pinned: self.pinned,
+            path: self.path.clone(),
+            name: self.name.clone(),
         }
     }
 }
@@ -854,11 +963,13 @@ mod tests {
         })
     }
 
-    fn new_map() -> MapData {
+    fn new_map(name: String) -> MapData {
         MapData {
             obj: new_obj_map(),
             fd: None,
             pinned: false,
+            path: None,
+            name,
         }
     }
 
@@ -872,21 +983,18 @@ mod tests {
             _ => Err((-1, io::Error::from_raw_os_error(EFAULT))),
         });
 
-        let mut map = new_map();
-        assert_matches!(map.create("foo", None), Ok(42));
+        let mut map = new_map("foo".to_string());
+        assert_matches!(map.create(None), Ok(42));
         assert_eq!(map.fd, Some(42));
-        assert_matches!(
-            map.create("foo", None),
-            Err(MapError::AlreadyCreated { .. })
-        );
+        assert_matches!(map.create(None), Err(MapError::AlreadyCreated { .. }));
     }
 
     #[test]
     fn test_create_failed() {
         override_syscall(|_| Err((-42, io::Error::from_raw_os_error(EFAULT))));
 
-        let mut map = new_map();
-        let ret = map.create("foo", None);
+        let mut map = new_map("foo".to_string());
+        let ret = map.create(None);
         assert_matches!(ret, Err(MapError::CreateError { .. }));
         if let Err(MapError::CreateError {
             name,
