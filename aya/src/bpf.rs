@@ -483,11 +483,13 @@ impl<'a> BpfLoader<'a> {
             let fd = match map.obj.pinning() {
                 PinningType::ByName => {
                     let path = match &map_pin_path {
-                        Some(p) => p,
-                        None => return Err(BpfError::NoPinPath),
+                        Some(p) => p.to_owned(),
+                        // pin maps in /sys/fs/bpf by default to align with libbpf
+                        // behavior https://github.com/libbpf/libbpf/blob/v1.2.2/src/libbpf.c#L2161
+                        None => PathBuf::from("/sys/fs/bpf"),
                     };
                     // try to open map in case it's already pinned
-                    match map.open_pinned(&name, path) {
+                    match map.open_pinned(&name, path.clone()) {
                         Ok(fd) => {
                             map.pinned = true;
                             fd as RawFd
