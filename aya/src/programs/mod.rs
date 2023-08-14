@@ -400,6 +400,40 @@ impl Program {
             Program::CgroupDevice(p) => p.fd(),
         }
     }
+
+    /// Returns information about a loaded program with the [`ProgramInfo`] structure.
+    ///
+    /// This information is populated at load time by the kernel and can be used
+    /// to correlate a given [`Program`] to it's corresponding [`ProgramInfo`]
+    /// metadata.
+    pub fn program_info(&self) -> Result<ProgramInfo, ProgramError> {
+        match self {
+            Program::KProbe(p) => p.program_info(),
+            Program::UProbe(p) => p.program_info(),
+            Program::TracePoint(p) => p.program_info(),
+            Program::SocketFilter(p) => p.program_info(),
+            Program::Xdp(p) => p.program_info(),
+            Program::SkMsg(p) => p.program_info(),
+            Program::SkSkb(p) => p.program_info(),
+            Program::SockOps(p) => p.program_info(),
+            Program::SchedClassifier(p) => p.program_info(),
+            Program::CgroupSkb(p) => p.program_info(),
+            Program::CgroupSysctl(p) => p.program_info(),
+            Program::CgroupSockopt(p) => p.program_info(),
+            Program::LircMode2(p) => p.program_info(),
+            Program::PerfEvent(p) => p.program_info(),
+            Program::RawTracePoint(p) => p.program_info(),
+            Program::Lsm(p) => p.program_info(),
+            Program::BtfTracePoint(p) => p.program_info(),
+            Program::FEntry(p) => p.program_info(),
+            Program::FExit(p) => p.program_info(),
+            Program::Extension(p) => p.program_info(),
+            Program::CgroupSockAddr(p) => p.program_info(),
+            Program::SkLookup(p) => p.program_info(),
+            Program::CgroupSock(p) => p.program_info(),
+            Program::CgroupDevice(p) => p.program_info(),
+        }
+    }
 }
 
 #[derive(Debug)]
