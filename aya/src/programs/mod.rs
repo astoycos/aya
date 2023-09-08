@@ -109,7 +109,7 @@ use crate::{
     generated::{bpf_attach_type, bpf_link_info, bpf_prog_info, bpf_prog_type},
     maps::MapError,
     obj::{self, btf::BtfError, VerifierLog},
-    pin::PinError,
+    pin::{PinError, PinIOError, PinIOErrors},
     programs::utils::{boot_time, get_fdinfo},
     sys::{
         bpf_btf_get_fd_by_id, bpf_get_object, bpf_link_get_fd_by_id, bpf_link_get_info_by_fd,
@@ -117,7 +117,7 @@ use crate::{
         bpf_prog_query, iter_link_ids, iter_prog_ids, retry_with_verifier_logs,
         BpfLoadProgramAttrs, SyscallError,
     },
-    util::KernelVersion,
+    util::{bytes_of_c_char, KernelVersion},
     VerifierLogLevel,
 };
 
@@ -786,9 +786,12 @@ macro_rules! impl_program_pin{
                 }
 
                 /// Removes the pinned link from the filesystem.
-                pub fn unpin(mut self) -> Result<(), io::Error> {
+                pub fn unpin(mut self) -> Result<(), PinError> {
                     if let Some(path) = self.data.path.take() {
-                        std::fs::remove_file(path)?;
+                        std::fs::remove_file(&path).map_err(|e| PinError::UnpinError{
+                            name: self.data.name.clone().unwrap(),
+                            errors: PinIOErrors([PinIOError::new(path, e)].into_iter().collect())
+                        })?;
                     }
                     Ok(())
                 }
@@ -977,17 +980,7 @@ impl ProgramInfo {
 
     /// The name of the program as was provided when it was load. This is limited to 16 bytes
     pub fn name(&self) -> &[u8] {
-        let length = self
-            .0
-            .name
-            .iter()
-            .rposition(|ch| *ch != 0)
-            .map(|pos| pos + 1)
-            .unwrap_or(0);
-
-        // The name field is defined as [std::os::raw::c_char; 16]. c_char may be signed or
-        // unsigned depending on the platform; that's why we're using from_raw_parts here
-        unsafe { std::slice::from_raw_parts(self.0.name.as_ptr() as *const _, length) }
+        bytes_of_c_char(&self.0.name)
     }
 
     /// The name of the program as a &str. If the name was not valid unicode, None is returned.
