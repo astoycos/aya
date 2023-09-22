@@ -118,7 +118,7 @@ mod tests {
             } => Ok(1337),
             call => panic!("unexpected syscall {:?}", call),
         });
-        MapData::create(obj, "foo".into(), None).unwrap()
+        MapData::create(obj, "foo", None).unwrap()
     }
 
     fn sys_error(value: i32) -> SysResult<c_long> {

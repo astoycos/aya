@@ -475,7 +475,7 @@ impl<'a> BpfLoader<'a> {
             }
             let btf_fd = btf_fd.as_deref().map(|fd| fd.as_fd());
             let mut map = match obj.pinning() {
-                PinningType::None => MapData::create(obj, name.clone(), btf_fd)?,
+                PinningType::None => MapData::create(obj, &name, btf_fd)?,
                 PinningType::ByName => {
                     // pin maps in /sys/fs/bpf by default to align with libbpf
                     // behavior https://github.com/libbpf/libbpf/blob/v1.2.2/src/libbpf.c#L2161.
@@ -483,7 +483,7 @@ impl<'a> BpfLoader<'a> {
                         .as_deref()
                         .unwrap_or_else(|| Path::new("/sys/fs/bpf"));
 
-                    MapData::create_pinned_by_name(path, obj, name.clone(), btf_fd)?
+                    MapData::create_pinned_by_name(path, obj, &name, btf_fd)?
                 }
             };
             map.finalize()?;
