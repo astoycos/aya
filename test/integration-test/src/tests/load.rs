@@ -1,5 +1,6 @@
 use std::{
     convert::TryInto as _,
+    fs::remove_file,
     path::Path,
     thread,
     time::{Duration, SystemTime},
@@ -40,7 +41,7 @@ fn multiple_btf_maps() {
 
     let map_1: Array<_, u64> = bpf.take_map("map_1").unwrap().try_into().unwrap();
     let map_2: Array<_, u64> = bpf.take_map("map_2").unwrap().try_into().unwrap();
-    let mut map_pin_by_name: Array<_, u64> =
+    let map_pin_by_name: Array<_, u64> =
         bpf.take_map("map_pin_by_name").unwrap().try_into().unwrap();
 
     let prog: &mut UProbe = bpf.program_mut("bpf_prog").unwrap().try_into().unwrap();
@@ -60,8 +61,8 @@ fn multiple_btf_maps() {
     assert_eq!(val_3, 44);
     let map_pin = Path::new("/sys/fs/bpf/map_pin_by_name");
     assert!(&map_pin.exists());
-    map_pin_by_name.unpin(map_pin).unwrap();
-    assert!(!map_pin.exists());
+
+    remove_file(map_pin).unwrap();
 }
 
 #[test]
@@ -69,12 +70,10 @@ fn pin_lifecycle_multiple_btf_maps() {
     let mut bpf = Bpf::load(crate::MULTIMAP_BTF).unwrap();
 
     // "map_pin_by_name" should already be pinned, unpin and pin again later
-    let map_pin_by_name = bpf.map_mut("map_pin_by_name").unwrap();
     let map_pin_by_name_path = Path::new("/sys/fs/bpf/map_pin_by_name");
 
     assert!(map_pin_by_name_path.exists());
-    map_pin_by_name.unpin(map_pin_by_name_path).unwrap();
-    assert!(!map_pin_by_name_path.exists());
+    remove_file(map_pin_by_name_path).unwrap();
 
     // pin and unpin all maps before casting to explicit types
     for (i, (name, map)) in bpf.maps_mut().enumerate() {
@@ -87,8 +86,7 @@ fn pin_lifecycle_multiple_btf_maps() {
         map.pin(map_pin_path).unwrap();
 
         assert!(map_pin_path.exists());
-        map.unpin(map_pin_path).unwrap();
-        assert!(!map_pin_path.exists());
+        remove_file(map_pin_path).unwrap();
     }
 
     let mut map_1: Array<_, u64> = bpf.take_map("map_1").unwrap().try_into().unwrap();
@@ -122,12 +120,9 @@ fn pin_lifecycle_multiple_btf_maps() {
     assert!(map_2_pin_path.exists());
     assert!(map_pin_by_name_path.exists());
 
-    map_1.unpin(map_1_pin_path).unwrap();
-    map_2.unpin(map_2_pin_path).unwrap();
-    map_pin_by_name.unpin(map_pin_by_name_path).unwrap();
-    assert!(!map_1_pin_path.exists());
-    assert!(!map_2_pin_path.exists());
-    assert!(!map_pin_by_name_path.exists());
+    remove_file(map_1_pin_path).unwrap();
+    remove_file(map_2_pin_path).unwrap();
+    remove_file(map_pin_by_name_path).unwrap();
 }
 
 #[no_mangle]

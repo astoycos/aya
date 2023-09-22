@@ -57,13 +57,13 @@ fn use_map_with_rbpf() {
             aya_obj::generated::bpf_map_type::BPF_MAP_TYPE_ARRAY as u32
         );
 
-        let map_id = if name == "map_1" {
-            0
-        } else if name == "map_2" {
-            1
-        } else {
-            2
+        let map_id = match name.as_str() {
+            "map_1" => 0,
+            "map_2" => 1,
+            "map_pin_by_name" => 2,
+            _ => panic!("Unexpected map name: {}", name),
         };
+
         let fd = map_id as i32 | 0xCAFE00;
         maps.insert(name.to_owned(), (fd, map.clone()));
 
@@ -105,7 +105,7 @@ fn use_map_with_rbpf() {
         .expect("Helper failed");
     assert_eq!(vm.execute_program().unwrap(), 0);
 
-    assert_eq!(map_instances, [[24], [42], [44],]);
+    assert_eq!(map_instances, [[24], [42], [44]]);
 
     unsafe {
         MULTIMAP_MAPS.iter_mut().for_each(|v| *v = null_mut());
