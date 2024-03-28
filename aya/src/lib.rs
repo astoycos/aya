@@ -173,3 +173,6 @@ impl Drop for MockableFd {
         }
     }
 }
+pub use sys::{
+    netlink_add_ip_addr, netlink_add_veth_pair, netlink_delete_link, netlink_set_link_down,
+};
