@@ -120,6 +120,52 @@ fn run() -> anyhow::Result<()> {
         })
         .collect::<Vec<_>>();
 
+
+    // Iterate files in /bin.
+    let read_dir = std::fs::read_dir("/bin").context("read_dir(/bin) failed")?;
+    read_dir.into_iter().for_each(|f| {
+            let file = f.unwrap(); 
+            print!("Binary: {:?}\n", file);
+
+            let metadata = std::fs::metadata(file.path()).unwrap();
+
+            println!("Is it a directory? {}", metadata.is_dir());
+            println!("Is it a file? {}", metadata.is_file());
+            println!("File size: {}", metadata.len());
+            println!("Last modified: {:?}", metadata.modified().unwrap());
+            println!("Permissions: {:?}", metadata.permissions());
+            println!("File_type: {:?}", metadata.file_type());
+            println!("Path: {:?}", file.path());
+            println!("Name: {:?}\n", file.file_name());
+
+            if file.file_name() == "k" { 
+                // execute tree
+                std::process::Command::new(file.path()).status()
+                .with_context(|| format!("failed to execute inner /bin/tree")).expect("inner tree failed");
+            }
+
+        }
+    );
+
+    // execute check config 
+    let status = std::process::Command::new("/bin/tree").status()
+    .with_context(|| format!("failed to execute /bin/tree"))?;
+
+    if status.code() == Some(0) {
+        ()
+    } else {
+        return Err(anyhow::anyhow!("tree failed: {status:?}"))
+    }
+
+    // execute check config 
+    let status = std::process::Command::new("/bin/check-config.sh").status()
+    .with_context(|| format!("failed to execute /bin/check-config.sh"))?;
+
+    if status.code() == Some(0) {
+        ()
+    } else {
+        return Err(anyhow::anyhow!("/bin/check-config.sh failed: {status:?}"))
+    }
     // Iterate files in /bin.
     let read_dir = std::fs::read_dir("/bin").context("read_dir(/bin) failed")?;
     let errors = read_dir

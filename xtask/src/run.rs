@@ -114,11 +114,11 @@ pub fn run(opts: Options) -> Result<()> {
     } = opts;
 
     type Binary = (String, PathBuf);
-    fn binaries(target: Option<&str>, is_vm: bool) -> Result<Vec<(&str, Vec<Binary>)>> {
+    fn binaries(target: Option<&str>) -> Result<Vec<(&str, Vec<Binary>)>> {
         ["dev", "release"]
             .into_iter()
             .map(|profile| {
-                let mut binaries = build(target, |cmd| {
+                let binaries = build(target, |cmd| {
                     cmd.env(AYA_BUILD_INTEGRATION_BPF, "true").args([
                         "--package",
                         "integration-test",
@@ -127,12 +127,6 @@ pub fn run(opts: Options) -> Result<()> {
                         profile,
                     ])
                 })?;
-                if is_vm {
-                    binaries.push((
-                        "check-config.sh".to_owned(),
-                        PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/check-config.sh")),
-                    ));
-                }
                 anyhow::Ok((profile, binaries))
             })
             .collect()
@@ -149,7 +143,7 @@ pub fn run(opts: Options) -> Result<()> {
             let runner = args.next().ok_or(anyhow!("no first argument"))?;
             let args = args.collect::<Vec<_>>();
 
-            let binaries = binaries(None, false)?;
+            let binaries = binaries(None)?;
 
             let mut failures = String::new();
             for (profile, binaries) in binaries {
@@ -287,7 +281,7 @@ pub fn run(opts: Options) -> Result<()> {
                     init => bail!("expected exactly one init program, found {init:?}"),
                 };
 
-                let binaries = binaries(Some(&target), true)?;
+                let binaries = binaries(Some(&target))?;
 
                 let tmp_dir = tempfile::tempdir().context("tempdir failed")?;
 
@@ -318,12 +312,38 @@ pub fn run(opts: Options) -> Result<()> {
                 // dir  /bin                  0755 0 0
                 // file /bin/foo path-to-foo  0755 0 0
                 // file /bin/bar path-to-bar  0755 0 0
-
+                eprintln!("INIT : {:?}", init);
                 for bytes in [
                     "file /init ".as_bytes(),
                     init.as_os_str().as_bytes(),
                     " 0755 0 0\n".as_bytes(),
                     "dir /bin 0755 0 0\n".as_bytes(),
+                ] {
+                    stdin.write_all(bytes).expect("write");
+                }
+
+                // Copy in tree + deps
+
+                stdin.write_all(b"file /bin/tree /usr/bin/tree 755 0 0\n").expect("write");
+                stdin.write_all(b"file /lib64/libc.so.6 /lib64/libc.so.6 755 0 0\n").expect("write");
+                stdin.write_all(b"file /lib64/ld-linux-x86-64.so.2 /lib64/ld-linux-x86-64.so.2 755 0 0\n").expect("write");
+
+
+                // Copy in Check config 
+                let name = format!("check-config.sh");
+                let path = tmp_dir.path().join(&name);
+                let source_path = concat!(env!("CARGO_MANIFEST_DIR"), "/check-config.sh");
+
+                copy(&PathBuf::from(source_path), &path).with_context(|| {
+                    format!("copy chk-config failed")
+                })?;
+                eprintln!("CHK CONFIG Source: {}", source_path);
+                eprintln!("CHK CONFIG Dest: {}", path.display());
+                for bytes in [
+                    "file /bin/check-config.sh".as_bytes(),
+                    " ".as_bytes(),
+                    path.as_os_str().as_bytes(),
+                    " 0755 0 0\n".as_bytes(),
                 ] {
                     stdin.write_all(bytes).expect("write");
                 }
