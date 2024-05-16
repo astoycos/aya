@@ -2,9 +2,7 @@
 set -e
 
 EXITCODE=0
-
-echi "HI FROM SCRIPT"
-
+gi
 # bits of this were adapted from lxc-checkconfig
 # see also https://github.com/lxc/lxc/blob/lxc-1.0.2/src/lxc/lxc-checkconfig.in
 

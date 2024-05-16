@@ -1,111 +1,14 @@
-   Compiling xtask v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/xtask)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.83s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.16s
      Running `target/debug/xtask integration-test vm test/.tmp/boot/vmlinuz-6.1.0-15-cloud-amd64`
-    Finished `release` profile [optimized] target(s) in 0.08s
-warning: integration-test@0.1.0:    Compiling proc-macro2 v1.0.79
-warning: integration-test@0.1.0:    Compiling unicode-ident v1.0.12
-warning: integration-test@0.1.0:    Compiling serde v1.0.197
-warning: integration-test@0.1.0:    Compiling compiler_builtins v0.1.109
-warning: integration-test@0.1.0:    Compiling thiserror v1.0.58
-warning: integration-test@0.1.0:    Compiling libc v0.2.153
-warning: integration-test@0.1.0:    Compiling rustix v0.38.32
-warning: integration-test@0.1.0:    Compiling linux-raw-sys v0.4.13
-warning: integration-test@0.1.0:    Compiling bitflags v2.5.0
-warning: integration-test@0.1.0:    Compiling glob v0.3.1
-warning: integration-test@0.1.0:    Compiling version_check v0.9.4
-warning: integration-test@0.1.0:    Compiling serde_json v1.0.115
-warning: integration-test@0.1.0:    Compiling hashbrown v0.14.3
-warning: integration-test@0.1.0:    Compiling equivalent v1.0.1
-warning: integration-test@0.1.0:    Compiling core v0.0.0 (/home/astoycos/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)
-warning: integration-test@0.1.0:    Compiling utf8parse v0.2.1
-warning: integration-test@0.1.0:    Compiling either v1.10.0
-warning: integration-test@0.1.0:    Compiling cfg-if v1.0.0
-warning: integration-test@0.1.0:    Compiling prettyplease v0.2.17
-warning: integration-test@0.1.0:    Compiling colorchoice v1.0.0
-warning: integration-test@0.1.0:    Compiling lazy_static v1.4.0
-warning: integration-test@0.1.0:    Compiling anstyle-query v1.0.2
-warning: integration-test@0.1.0:    Compiling regex-syntax v0.8.3
-warning: integration-test@0.1.0:    Compiling memchr v2.7.2
-warning: integration-test@0.1.0:    Compiling home v0.5.9
-warning: integration-test@0.1.0:    Compiling ryu v1.0.17
-warning: integration-test@0.1.0:    Compiling camino v1.1.6
-warning: integration-test@0.1.0:    Compiling anstyle v1.0.6
-warning: integration-test@0.1.0:    Compiling semver v1.0.22
-warning: integration-test@0.1.0:    Compiling anstyle-parse v0.2.3
-warning: integration-test@0.1.0:    Compiling minimal-lexical v0.2.1
-warning: integration-test@0.1.0:    Compiling winnow v0.6.5
-warning: integration-test@0.1.0:    Compiling itoa v1.0.11
-warning: integration-test@0.1.0:    Compiling libloading v0.8.3
-warning: integration-test@0.1.0:    Compiling clap_lex v0.7.0
-warning: integration-test@0.1.0:    Compiling strsim v0.11.1
-warning: integration-test@0.1.0:    Compiling rustversion v1.0.14
-warning: integration-test@0.1.0:    Compiling anyhow v1.0.81
-warning: integration-test@0.1.0:    Compiling anstream v0.6.13
-warning: integration-test@0.1.0:    Compiling once_cell v1.19.0
-warning: integration-test@0.1.0:    Compiling bindgen v0.69.4
-warning: integration-test@0.1.0:    Compiling heck v0.5.0
-warning: integration-test@0.1.0:    Compiling itertools v0.12.1
-warning: integration-test@0.1.0:    Compiling unicode-width v0.1.11
+    Finished `release` profile [optimized] target(s) in 0.10s
 warning: integration-test@0.1.0:    Compiling aya-ebpf-cty v0.2.1 (/home/astoycos/go/src/github.com/aya-rs/aya/ebpf/aya-ebpf-cty)
-warning: integration-test@0.1.0:    Compiling proc-macro-error-attr v1.0.4
-warning: integration-test@0.1.0:    Compiling proc-macro-error v1.0.4
-warning: integration-test@0.1.0:    Compiling shlex v1.3.0
-warning: integration-test@0.1.0:    Compiling pin-project-lite v0.2.14
-warning: integration-test@0.1.0:    Compiling log v0.4.21
-warning: integration-test@0.1.0:    Compiling lazycell v1.3.0
-warning: integration-test@0.1.0:    Compiling tracing-core v0.1.32
-warning: integration-test@0.1.0:    Compiling fastrand v2.0.2
-warning: integration-test@0.1.0:    Compiling clang-sys v1.7.0
-warning: integration-test@0.1.0:    Compiling clap_builder v4.5.2
-warning: integration-test@0.1.0:    Compiling rustc-hash v1.1.0
 warning: integration-test@0.1.0:    Compiling aya-ebpf-bindings v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/ebpf/aya-ebpf-bindings)
-warning: integration-test@0.1.0:    Compiling shell-words v1.1.0
-warning: integration-test@0.1.0:    Compiling hashbag v0.1.12
-warning: integration-test@0.1.0:    Compiling diff v0.1.13
-warning: integration-test@0.1.0:    Compiling indoc v2.0.5
-warning: integration-test@0.1.0:    Compiling nom v7.1.3
-warning: integration-test@0.1.0:    Compiling indexmap v2.2.6
-warning: integration-test@0.1.0:    Compiling quote v1.0.35
 warning: integration-test@0.1.0:    Compiling aya-ebpf v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/ebpf/aya-ebpf)
-warning: integration-test@0.1.0:    Compiling syn v2.0.58
-warning: integration-test@0.1.0:    Compiling console v0.15.8
-warning: integration-test@0.1.0:    Compiling regex-automata v0.4.6
-warning: integration-test@0.1.0:    Compiling which v4.4.2
-warning: integration-test@0.1.0:    Compiling tempfile v3.10.1
-warning: integration-test@0.1.0:    Compiling which v6.0.1
-warning: integration-test@0.1.0:    Compiling cexpr v0.6.0
-warning: integration-test@0.1.0:    Compiling regex v1.10.4
-warning: integration-test@0.1.0:    Compiling serde_derive v1.0.197
-warning: integration-test@0.1.0:    Compiling thiserror-impl v1.0.58
-warning: integration-test@0.1.0:    Compiling num_enum_derive v0.7.2
-warning: integration-test@0.1.0:    Compiling clap_derive v4.5.4
-warning: integration-test@0.1.0:    Compiling tracing-attributes v0.1.27
 warning: integration-test@0.1.0:    Compiling aya-ebpf-macros v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/aya-ebpf-macros)
-warning: integration-test@0.1.0:    Compiling num_enum v0.7.2
-warning: integration-test@0.1.0:    Compiling aya-log-common v0.1.14 (/home/astoycos/go/src/github.com/aya-rs/aya/aya-log-common)
-warning: integration-test@0.1.0:    Compiling aya-log-parser v0.1.13 (/home/astoycos/go/src/github.com/aya-rs/aya/aya-log-parser)
-warning: integration-test@0.1.0:    Compiling rustup-toolchain v0.1.6
-warning: integration-test@0.1.0:    Compiling dialoguer v0.11.0
-warning: integration-test@0.1.0:    Compiling tracing v0.1.40
-warning: integration-test@0.1.0:    Compiling aya-log-ebpf-macros v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/aya-log-ebpf-macros)
-warning: integration-test@0.1.0:    Compiling clap v4.5.4
-warning: integration-test@0.1.0:    Compiling aya-tool v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/aya-tool)
-warning: integration-test@0.1.0:    Compiling toml_datetime v0.6.5
-warning: integration-test@0.1.0:    Compiling serde_spanned v0.6.5
-warning: integration-test@0.1.0:    Compiling cargo-platform v0.1.8
-warning: integration-test@0.1.0:    Compiling rustdoc-types v0.23.0
-warning: integration-test@0.1.0:    Compiling toml_edit v0.22.9
-warning: integration-test@0.1.0:    Compiling rustc-std-workspace-core v1.99.0 (/home/astoycos/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/rustc-std-workspace-core)
-warning: integration-test@0.1.0:    Compiling cargo_metadata v0.18.1
-warning: integration-test@0.1.0:    Compiling public-api v0.33.1
-warning: integration-test@0.1.0:    Compiling toml v0.8.12
 warning: integration-test@0.1.0:    Compiling aya-log-ebpf v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/ebpf/aya-log-ebpf)
-warning: integration-test@0.1.0:    Compiling cargo-manifest v0.14.0
-warning: integration-test@0.1.0:    Compiling rustdoc-json v0.9.0
-warning: integration-test@0.1.0:    Compiling xtask v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/xtask)
 warning: integration-test@0.1.0:    Compiling integration-ebpf v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/test/integration-ebpf)
-warning: integration-test@0.1.0:     Finished `release` profile [optimized] target(s) in 17.23s
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.14s
+warning: integration-test@0.1.0:     Finished `release` profile [optimized] target(s) in 2.80s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.15s
 cargo:warning=warning: unused imports: `Command`, `Write`
 cargo:warning= --> test/integration-test/src/utils.rs:5:16
 cargo:warning=  |
@@ -121,109 +24,13 @@ cargo:warning=
 cargo:warning=warning: 1 warning emitted
 cargo:warning=
 cargo:warning=
-warning: integration-test@0.1.0:    Compiling proc-macro2 v1.0.79
-warning: integration-test@0.1.0:    Compiling unicode-ident v1.0.12
-warning: integration-test@0.1.0:    Compiling serde v1.0.197
-warning: integration-test@0.1.0:    Compiling thiserror v1.0.58
-warning: integration-test@0.1.0:    Compiling compiler_builtins v0.1.109
-warning: integration-test@0.1.0:    Compiling libc v0.2.153
-warning: integration-test@0.1.0:    Compiling rustix v0.38.32
-warning: integration-test@0.1.0:    Compiling bitflags v2.5.0
-warning: integration-test@0.1.0:    Compiling version_check v0.9.4
-warning: integration-test@0.1.0:    Compiling glob v0.3.1
-warning: integration-test@0.1.0:    Compiling linux-raw-sys v0.4.13
-warning: integration-test@0.1.0:    Compiling cfg-if v1.0.0
-warning: integration-test@0.1.0:    Compiling equivalent v1.0.1
-warning: integration-test@0.1.0:    Compiling hashbrown v0.14.3
-warning: integration-test@0.1.0:    Compiling core v0.0.0 (/home/astoycos/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)
-warning: integration-test@0.1.0:    Compiling prettyplease v0.2.17
-warning: integration-test@0.1.0:    Compiling serde_json v1.0.115
-warning: integration-test@0.1.0:    Compiling utf8parse v0.2.1
-warning: integration-test@0.1.0:    Compiling either v1.10.0
-warning: integration-test@0.1.0:    Compiling semver v1.0.22
-warning: integration-test@0.1.0:    Compiling anstyle-query v1.0.2
-warning: integration-test@0.1.0:    Compiling itoa v1.0.11
-warning: integration-test@0.1.0:    Compiling regex-syntax v0.8.3
-warning: integration-test@0.1.0:    Compiling camino v1.1.6
-warning: integration-test@0.1.0:    Compiling ryu v1.0.17
-warning: integration-test@0.1.0:    Compiling winnow v0.6.5
-warning: integration-test@0.1.0:    Compiling anstyle-parse v0.2.3
-warning: integration-test@0.1.0:    Compiling lazy_static v1.4.0
-warning: integration-test@0.1.0:    Compiling colorchoice v1.0.0
-warning: integration-test@0.1.0:    Compiling minimal-lexical v0.2.1
-warning: integration-test@0.1.0:    Compiling home v0.5.9
-warning: integration-test@0.1.0:    Compiling anstyle v1.0.6
-warning: integration-test@0.1.0:    Compiling memchr v2.7.2
-warning: integration-test@0.1.0:    Compiling libloading v0.8.3
-warning: integration-test@0.1.0:    Compiling rustversion v1.0.14
-warning: integration-test@0.1.0:    Compiling anyhow v1.0.81
-warning: integration-test@0.1.0:    Compiling bindgen v0.69.4
-warning: integration-test@0.1.0:    Compiling heck v0.5.0
-warning: integration-test@0.1.0:    Compiling strsim v0.11.1
-warning: integration-test@0.1.0:    Compiling once_cell v1.19.0
-warning: integration-test@0.1.0:    Compiling clap_lex v0.7.0
-warning: integration-test@0.1.0:    Compiling itertools v0.12.1
-warning: integration-test@0.1.0:    Compiling anstream v0.6.13
-warning: integration-test@0.1.0:    Compiling pin-project-lite v0.2.14
-warning: integration-test@0.1.0:    Compiling lazycell v1.3.0
-warning: integration-test@0.1.0:    Compiling proc-macro-error-attr v1.0.4
-warning: integration-test@0.1.0:    Compiling proc-macro-error v1.0.4
-warning: integration-test@0.1.0:    Compiling shlex v1.3.0
-warning: integration-test@0.1.0:    Compiling log v0.4.21
-warning: integration-test@0.1.0:    Compiling tracing-core v0.1.32
-warning: integration-test@0.1.0:    Compiling rustc-hash v1.1.0
-warning: integration-test@0.1.0:    Compiling fastrand v2.0.2
-warning: integration-test@0.1.0:    Compiling unicode-width v0.1.11
 warning: integration-test@0.1.0:    Compiling aya-ebpf-cty v0.2.1 (/home/astoycos/go/src/github.com/aya-rs/aya/ebpf/aya-ebpf-cty)
-warning: integration-test@0.1.0:    Compiling clang-sys v1.7.0
 warning: integration-test@0.1.0:    Compiling aya-ebpf-bindings v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/ebpf/aya-ebpf-bindings)
-warning: integration-test@0.1.0:    Compiling hashbag v0.1.12
-warning: integration-test@0.1.0:    Compiling shell-words v1.1.0
-warning: integration-test@0.1.0:    Compiling indoc v2.0.5
-warning: integration-test@0.1.0:    Compiling diff v0.1.13
-warning: integration-test@0.1.0:    Compiling clap_builder v4.5.2
-warning: integration-test@0.1.0:    Compiling indexmap v2.2.6
-warning: integration-test@0.1.0:    Compiling quote v1.0.35
-warning: integration-test@0.1.0:    Compiling nom v7.1.3
 warning: integration-test@0.1.0:    Compiling aya-ebpf v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/ebpf/aya-ebpf)
-warning: integration-test@0.1.0:    Compiling syn v2.0.58
-warning: integration-test@0.1.0:    Compiling console v0.15.8
-warning: integration-test@0.1.0:    Compiling regex-automata v0.4.6
-warning: integration-test@0.1.0:    Compiling which v4.4.2
-warning: integration-test@0.1.0:    Compiling tempfile v3.10.1
-warning: integration-test@0.1.0:    Compiling which v6.0.1
-warning: integration-test@0.1.0:    Compiling cexpr v0.6.0
-warning: integration-test@0.1.0:    Compiling regex v1.10.4
-warning: integration-test@0.1.0:    Compiling serde_derive v1.0.197
-warning: integration-test@0.1.0:    Compiling thiserror-impl v1.0.58
-warning: integration-test@0.1.0:    Compiling num_enum_derive v0.7.2
-warning: integration-test@0.1.0:    Compiling clap_derive v4.5.4
-warning: integration-test@0.1.0:    Compiling tracing-attributes v0.1.27
 warning: integration-test@0.1.0:    Compiling aya-ebpf-macros v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/aya-ebpf-macros)
-warning: integration-test@0.1.0:    Compiling num_enum v0.7.2
-warning: integration-test@0.1.0:    Compiling aya-log-common v0.1.14 (/home/astoycos/go/src/github.com/aya-rs/aya/aya-log-common)
-warning: integration-test@0.1.0:    Compiling aya-log-parser v0.1.13 (/home/astoycos/go/src/github.com/aya-rs/aya/aya-log-parser)
-warning: integration-test@0.1.0:    Compiling rustup-toolchain v0.1.6
-warning: integration-test@0.1.0:    Compiling dialoguer v0.11.0
-warning: integration-test@0.1.0:    Compiling aya-log-ebpf-macros v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/aya-log-ebpf-macros)
-warning: integration-test@0.1.0:    Compiling tracing v0.1.40
-warning: integration-test@0.1.0:    Compiling clap v4.5.4
-warning: integration-test@0.1.0:    Compiling aya-tool v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/aya-tool)
-warning: integration-test@0.1.0:    Compiling toml_datetime v0.6.5
-warning: integration-test@0.1.0:    Compiling serde_spanned v0.6.5
-warning: integration-test@0.1.0:    Compiling cargo-platform v0.1.8
-warning: integration-test@0.1.0:    Compiling rustdoc-types v0.23.0
-warning: integration-test@0.1.0:    Compiling toml_edit v0.22.9
-warning: integration-test@0.1.0:    Compiling rustc-std-workspace-core v1.99.0 (/home/astoycos/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/rustc-std-workspace-core)
-warning: integration-test@0.1.0:    Compiling cargo_metadata v0.18.1
-warning: integration-test@0.1.0:    Compiling public-api v0.33.1
 warning: integration-test@0.1.0:    Compiling aya-log-ebpf v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/ebpf/aya-log-ebpf)
-warning: integration-test@0.1.0:    Compiling toml v0.8.12
-warning: integration-test@0.1.0:    Compiling cargo-manifest v0.14.0
-warning: integration-test@0.1.0:    Compiling rustdoc-json v0.9.0
-warning: integration-test@0.1.0:    Compiling xtask v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/xtask)
 warning: integration-test@0.1.0:    Compiling integration-ebpf v0.1.0 (/home/astoycos/go/src/github.com/aya-rs/aya/test/integration-ebpf)
-warning: integration-test@0.1.0:     Finished `release` profile [optimized] target(s) in 17.40s
+warning: integration-test@0.1.0:     Finished `release` profile [optimized] target(s) in 3.11s
     Finished `release` profile [optimized] target(s) in 0.15s
 cargo:warning=warning: unused imports: `Command`, `Write`
 cargo:warning= --> test/integration-test/src/utils.rs:5:16
@@ -242,13 +49,13 @@ cargo:warning=
 cargo:warning=
 INIT : "/home/astoycos/go/src/github.com/aya-rs/aya/target/x86_64-unknown-linux-musl/release/init"
 CHK CONFIG Source: /home/astoycos/go/src/github.com/aya-rs/aya/xtask/check-config.sh
-CHK CONFIG Dest: /tmp/.tmpjL38Rx/check-config.sh
+CHK CONFIG Dest: /tmp/.tmpf8ARLZ/check-config.sh
 Name: dev-integration_test
-Binary: /home/astoycos/go/src/github.com/aya-rs/aya/target/x86_64-unknown-linux-musl/debug/deps/integration_test-f8300bfd129cb3f1
-Path: /tmp/.tmpjL38Rx/dev-integration_test
+Binary: /home/astoycos/go/src/github.com/aya-rs/aya/target/x86_64-unknown-linux-musl/debug/deps/integration_test-a67381430c391aa7
+Path: /tmp/.tmpf8ARLZ/dev-integration_test
 Name: release-integration_test
-Binary: /home/astoycos/go/src/github.com/aya-rs/aya/target/x86_64-unknown-linux-musl/release/deps/integration_test-e577082b5e4b8a5a
-Path: /tmp/.tmpjL38Rx/release-integration_test
+Binary: /home/astoycos/go/src/github.com/aya-rs/aya/target/x86_64-unknown-linux-musl/release/deps/integration_test-d8706267590fd947
+Path: /tmp/.tmpf8ARLZ/release-integration_test
 c[?7l[2J[0mSeaBIOS (version 1.16.3-1.fc39)
 
 
@@ -274,324 +81,364 @@ Probing EDD (edd=off to disable)... oc[?7l[2J[0mk[    0.000000] Linux versi
 [    0.000000] DMI: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 1.16.3-1.fc39 04/01/2014
 [    0.000000] Hypervisor detected: KVM
 [    0.000000] kvm-clock: Using msrs 4b564d01 and 4b564d00
-[    0.000001] kvm-clock: using sched offset of 196943025 cycles
+[    0.000001] kvm-clock: using sched offset of 202936363 cycles
 [    0.000003] clocksource: kvm-clock: mask: 0xffffffffffffffff max_cycles: 0x1cd42e4dffb, max_idle_ns: 881590591483 ns
 [    0.000006] tsc: Detected 2399.996 MHz processor
-[    0.001016] last_pfn = 0x1ffdf max_arch_pfn = 0x400000000
-[    0.001061] x86/PAT: Configuration [0-7]: WB  WC  UC- UC  WB  WP  UC- WT  
-[    0.001277] RAMDISK: [mem 0x1cf72000-0x1ffcffff]
-[    0.001290] ACPI: Early table checksum verification disabled
-[    0.001294] ACPI: RSDP 0x00000000000F5260 000014 (v00 BOCHS )
-[    0.001298] ACPI: RSDT 0x000000001FFE2357 000038 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
-[    0.001305] ACPI: FACP 0x000000001FFE2147 0000F4 (v03 BOCHS  BXPC     00000001 BXPC 00000001)
-[    0.001312] ACPI: DSDT 0x000000001FFE0040 002107 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
-[    0.001316] ACPI: FACS 0x000000001FFE0000 000040
-[    0.001320] ACPI: APIC 0x000000001FFE223B 000080 (v03 BOCHS  BXPC     00000001 BXPC 00000001)
-[    0.001325] ACPI: HPET 0x000000001FFE22BB 000038 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
-[    0.001329] ACPI: MCFG 0x000000001FFE22F3 00003C (v01 BOCHS  BXPC     00000001 BXPC 00000001)
-[    0.001333] ACPI: WAET 0x000000001FFE232F 000028 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
-[    0.001337] ACPI: Reserving FACP table memory at [mem 0x1ffe2147-0x1ffe223a]
-[    0.001338] ACPI: Reserving DSDT table memory at [mem 0x1ffe0040-0x1ffe2146]
-[    0.001339] ACPI: Reserving FACS table memory at [mem 0x1ffe0000-0x1ffe003f]
-[    0.001340] ACPI: Reserving APIC table memory at [mem 0x1ffe223b-0x1ffe22ba]
-[    0.001341] ACPI: Reserving HPET table memory at [mem 0x1ffe22bb-0x1ffe22f2]
-[    0.001342] ACPI: Reserving MCFG table memory at [mem 0x1ffe22f3-0x1ffe232e]
-[    0.001343] ACPI: Reserving WAET table memory at [mem 0x1ffe232f-0x1ffe2356]
-[    0.001400] No NUMA configuration found
-[    0.001401] Faking a node at [mem 0x0000000000000000-0x000000001ffdefff]
-[    0.001411] NODE_DATA(0) allocated [mem 0x1cf47000-0x1cf71fff]
-[    0.001686] Zone ranges:
-[    0.001687]   DMA      [mem 0x0000000000001000-0x0000000000ffffff]
-[    0.001689]   DMA32    [mem 0x0000000001000000-0x000000001ffdefff]
-[    0.001690]   Normal   empty
-[    0.001691]   Device   empty
-[    0.001692] Movable zone start for each node
-[    0.001695] Early memory node ranges
-[    0.001696]   node   0: [mem 0x0000000000001000-0x000000000009efff]
-[    0.001697]   node   0: [mem 0x0000000000100000-0x000000001ffdefff]
-[    0.001699] Initmem setup node 0 [mem 0x0000000000001000-0x000000001ffdefff]
-[    0.002096] On node 0, zone DMA: 1 pages in unavailable ranges
-[    0.002127] On node 0, zone DMA: 97 pages in unavailable ranges
-[    0.003323] On node 0, zone DMA32: 33 pages in unavailable ranges
-[    0.003717] ACPI: PM-Timer IO Port: 0x608
-[    0.003730] ACPI: LAPIC_NMI (acpi_id[0xff] dfl dfl lint[0x1])
-[    0.003732] ACPI: Skipping IOAPIC probe due to 'noapic' option.
-[    0.003735] ACPI: Using ACPI for processor (LAPIC) configuration information
-[    0.003736] ACPI: HPET id: 0x8086a201 base: 0xfed00000
-[    0.003740] smpboot: Allowing 2 CPUs, 0 hotplug CPUs
-[    0.003758] PM: hibernation: Registered nosave memory: [mem 0x00000000-0x00000fff]
-[    0.003760] PM: hibernation: Registered nosave memory: [mem 0x0009f000-0x0009ffff]
-[    0.003761] PM: hibernation: Registered nosave memory: [mem 0x000a0000-0x000effff]
-[    0.003762] PM: hibernation: Registered nosave memory: [mem 0x000f0000-0x000fffff]
-[    0.003764] [mem 0x20000000-0xafffffff] available for PCI devices
-[    0.003765] Booting paravirtualized kernel on KVM
-[    0.003766] clocksource: refined-jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645519600211568 ns
-[    0.008080] setup_percpu: NR_CPUS:8192 nr_cpumask_bits:2 nr_cpu_ids:2 nr_node_ids:1
-[    0.008595] percpu: Embedded 61 pages/cpu s212992 r8192 d28672 u1048576
-[    0.008628] kvm-guest: PV spinlocks disabled, no host support
-[    0.008631] Fallback order for Node 0: 0 
-[    0.008633] Built 1 zonelists, mobility grouping on.  Total pages: 128735
-[    0.008635] Policy zone: DMA32
-[    0.008636] Kernel command line: console=ttyS0 init.arg=--test-threads=1 noapic
-[    0.008752] Dentry cache hash table entries: 65536 (order: 7, 524288 bytes, linear)
-[    0.008791] Inode-cache hash table entries: 32768 (order: 6, 262144 bytes, linear)
-[    0.008842] mem auto-init: stack:all(zero), heap alloc:on, heap free:off
-[    0.010759] Memory: 223928K/523764K available (12295K kernel code, 2320K rwdata, 8272K rodata, 2584K init, 3488K bss, 96764K reserved, 0K cma-reserved)
-[    0.011052] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=2, Nodes=1
-[    0.011064] Kernel/User page tables isolation: enabled
-[    0.011092] ftrace: allocating 37357 entries in 146 pages
-[    0.017836] ftrace: allocated 146 pages with 3 groups
-[    0.018511] Dynamic Preempt: voluntary
-[    0.018929] rcu: Preemptible hierarchical RCU implementation.
-[    0.018931] rcu: 	RCU restricting CPUs from NR_CPUS=8192 to nr_cpu_ids=2.
-[    0.018932] 	Trampoline variant of Tasks RCU enabled.
-[    0.018933] 	Rude variant of Tasks RCU enabled.
-[    0.018933] 	Tracing variant of Tasks RCU enabled.
-[    0.018934] rcu: RCU calculated value of scheduler-enlistment delay is 25 jiffies.
-[    0.018935] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=2
-[    0.023657] NR_IRQS: 524544, nr_irqs: 48, preallocated irqs: 16
-[    0.023850] rcu: srcu_init: Setting srcu_struct sizes based on contention.
-[    0.036283] Console: colour VGA+ 80x25
-[    0.136829] printk: console [ttyS0] enabled
-[    0.137545] ACPI: Core revision 20220331
-[    0.138248] ACPI: setting ELCR to 0200 (from 0c00)
-[    0.139152] clocksource: hpet: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604467 ns
-[    0.140739] APIC: Switch to symmetric I/O mode setup
-[    0.141596] Not enabling interrupt remapping due to skipped IO-APIC setup
-[    0.142759] clocksource: tsc-early: mask: 0xffffffffffffffff max_cycles: 0x229833f6470, max_idle_ns: 440795327230 ns
-[    0.144519] Calibrating delay loop (skipped) preset value.. 4799.99 BogoMIPS (lpj=9599984)
-[    0.148613] Last level iTLB entries: 4KB 0, 2MB 0, 4MB 0
-[    0.149483] Last level dTLB entries: 4KB 0, 2MB 0, 4MB 0, 1GB 0
-[    0.150452] Spectre V1 : Mitigation: usercopy/swapgs barriers and __user pointer sanitization
-[    0.152521] Spectre V2 : Mitigation: Retpolines
-[    0.153357] Spectre V2 : Spectre v2 / SpectreRSB mitigation: Filling RSB on context switch
-[    0.154783] Spectre V2 : Spectre v2 / SpectreRSB : Filling RSB on VMEXIT
-[    0.156519] Speculative Store Bypass: Vulnerable
-[    0.157286] MDS: Vulnerable: Clear CPU buffers attempted, no microcode
-[    0.158355] MMIO Stale Data: Unknown: No mitigations
-[    0.159230] x86/fpu: x87 FPU will use FXSAVE
-[    0.173060] Freeing SMP alternatives memory: 36K
-[    0.173849] pid_max: default: 32768 minimum: 301
-[    0.174670] LSM: Security Framework initializing
-[    0.175469] landlock: Up and running.
-[    0.176079] Yama: disabled by default; enable with sysctl kernel.yama.*
-[    0.176549] AppArmor: AppArmor initialized
-[    0.177231] TOMOYO Linux initialized
-[    0.177823] LSM support for eBPF active
-[    0.178495] Mount-cache hash table entries: 1024 (order: 1, 8192 bytes, linear)
-[    0.179691] Mountpoint-cache hash table entries: 1024 (order: 1, 8192 bytes, linear)
-[    0.290466] smpboot: CPU0: Intel QEMU Virtual CPU version 2.5+ (family: 0xf, model: 0x6b, stepping: 0x1)
-[    0.292197] cblist_init_generic: Setting adjustable number of callback queues.
-[    0.292514] cblist_init_generic: Setting shift to 1 and lim to 1.
-[    0.292514] cblist_init_generic: Setting adjustable number of callback queues.
-[    0.293706] cblist_init_generic: Setting shift to 1 and lim to 1.
-[    0.294737] cblist_init_generic: Setting adjustable number of callback queues.
-[    0.295919] cblist_init_generic: Setting shift to 1 and lim to 1.
-[    0.296536] Performance Events: unsupported Netburst CPU model 107 no PMU driver, software events only.
-[    0.298117] signal: max sigframe size: 1440
-[    0.298838] rcu: Hierarchical SRCU implementation.
-[    0.299630] rcu: 	Max phase no-delay instances is 1000.
-[    0.300768] NMI watchdog: Perf NMI watchdog permanently disabled
-[    0.301851] smp: Bringing up secondary CPUs ...
-[    0.302730] x86: Booting SMP configuration:
-[    0.303434] .... node  #0, CPUs:      #1
-[    0.316554] smp: Brought up 1 node, 2 CPUs
-[    0.317892] smpboot: Max logical packages: 1
-[    0.318611] smpboot: Total of 2 processors activated (9599.98 BogoMIPS)
-[    0.321533] node 0 deferred pages initialised in 0ms
-[    0.323472] devtmpfs: initialized
-[    0.324569] x86/mm: Memory block size: 128MB
-[    0.325451] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
-[    0.326189] futex hash table entries: 512 (order: 3, 32768 bytes, linear)
-[    0.329314] NET: Registered PF_NETLINK/PF_ROUTE protocol family
-[    0.330408] DMA: preallocated 128 KiB GFP_KERNEL pool for atomic allocations
-[    0.331605] DMA: preallocated 128 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
-[    0.332962] DMA: preallocated 128 KiB GFP_KERNEL|GFP_DMA32 pool for atomic allocations
-[    0.334811] audit: initializing netlink subsys (disabled)
-[    0.336574] audit: type=2000 audit(1715280988.082:1): state=initialized audit_enabled=0 res=1
-[    0.336657] thermal_sys: Registered thermal governor 'fair_share'
-[    0.339562] thermal_sys: Registered thermal governor 'bang_bang'
-[    0.340526] thermal_sys: Registered thermal governor 'step_wise'
-[    0.341882] thermal_sys: Registered thermal governor 'user_space'
-[    0.343251] thermal_sys: Registered thermal governor 'power_allocator'
-[    0.344539] cpuidle: using governor ladder
-[    0.346936] cpuidle: using governor menu
-[    0.348658] acpiphp: ACPI Hot Plug PCI Controller Driver version: 0.5
-[    0.350247] PCI: MMCONFIG for domain 0000 [bus 00-ff] at [mem 0xb0000000-0xbfffffff] (base 0xb0000000)
-[    0.352519] PCI: MMCONFIG at [mem 0xb0000000-0xbfffffff] reserved in E820
-[    0.354034] PCI: Using configuration type 1 for base access
-[    0.356805] kprobes: kprobe jump-optimization is enabled. All kprobes are optimized if possible.
-[    0.373256] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
-[    0.375786] HugeTLB: 28 KiB vmemmap can be freed for a 2.00 MiB page
-[    0.377405] ACPI: Added _OSI(Module Device)
-[    0.380533] ACPI: Added _OSI(Processor Device)
-[    0.382096] ACPI: Added _OSI(3.0 _SCP Extensions)
-[    0.383759] ACPI: Added _OSI(Processor Aggregator Device)
-[    0.387834] ACPI: 1 ACPI AML tables successfully acquired and loaded
-[    0.392802] ACPI: Interpreter enabled
-[    0.392802] ACPI: PM: (supports S0 S3 S4 S5)
-[    0.394148] ACPI: Using PIC for interrupt routing
-[    0.396584] PCI: Using host bridge windows from ACPI; if necessary, use "pci=nocrs" and report a bug
-[    0.400519] PCI: Using E820 reservations for host bridge windows
-[    0.402667] ACPI: Enabled 2 GPEs in block 00 to 3F
-[    0.407188] ACPI: PCI Root Bridge [PCI0] (domain 0000 [bus 00-ff])
-[    0.408523] acpi PNP0A08:00: _OSC: OS supports [ExtendedConfig ASPM ClockPM Segments MSI HPX-Type3]
-[    0.411105] acpi PNP0A08:00: _OSC: platform does not support [PCIeHotplug LTR]
-[    0.412595] acpi PNP0A08:00: _OSC: OS now controls [PME AER PCIeCapability]
-[    0.414672] PCI host bridge to bus 0000:00
-[    0.416518] pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7 window]
-[    0.418271] pci_bus 0000:00: root bus resource [io  0x0d00-0xffff window]
-[    0.419901] pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff window]
-[    0.420518] pci_bus 0000:00: root bus resource [mem 0x20000000-0xafffffff window]
-[    0.422312] pci_bus 0000:00: root bus resource [mem 0xc0000000-0xfebfffff window]
-[    0.424517] pci_bus 0000:00: root bus resource [mem 0x100000000-0x8ffffffff window]
-[    0.426274] pci_bus 0000:00: root bus resource [bus 00-ff]
-[    0.428620] pci 0000:00:00.0: [8086:29c0] type 00 class 0x060000
-[    0.430498] pci 0000:00:01.0: [1234:1111] type 00 class 0x030000
-[    0.433239] pci 0000:00:01.0: reg 0x10: [mem 0xfd000000-0xfdffffff pref]
-[    0.437978] pci 0000:00:01.0: reg 0x18: [mem 0xfebd4000-0xfebd4fff]
-[    0.443968] pci 0000:00:01.0: reg 0x30: [mem 0xfebc0000-0xfebcffff pref]
-[    0.444648] pci 0000:00:01.0: Video device with shadowed ROM at [mem 0x000c0000-0x000dffff]
-[    0.446672] pci 0000:00:02.0: [8086:10d3] type 00 class 0x020000
-[    0.449721] pci 0000:00:02.0: reg 0x10: [mem 0xfeb80000-0xfeb9ffff]
-[    0.452517] pci 0000:00:02.0: reg 0x14: [mem 0xfeba0000-0xfebbffff]
-[    0.455121] pci 0000:00:02.0: reg 0x18: [io  0xc040-0xc05f]
-[    0.457053] pci 0000:00:02.0: reg 0x1c: [mem 0xfebd0000-0xfebd3fff]
-[    0.463576] pci 0000:00:02.0: reg 0x30: [mem 0xfeb40000-0xfeb7ffff pref]
-[    0.465787] pci 0000:00:1f.0: [8086:2918] type 00 class 0x060100
-[    0.469117] pci 0000:00:1f.0: quirk: [io  0x0600-0x067f] claimed by ICH6 ACPI/GPIO/TCO
-[    0.470880] pci 0000:00:1f.2: [8086:2922] type 00 class 0x010601
-[    0.475364] pci 0000:00:1f.2: reg 0x20: [io  0xc060-0xc07f]
-[    0.477047] pci 0000:00:1f.2: reg 0x24: [mem 0xfebd5000-0xfebd5fff]
-[    0.479172] pci 0000:00:1f.3: [8086:2930] type 00 class 0x0c0500
-[    0.482016] pci 0000:00:1f.3: reg 0x20: [io  0x0700-0x073f]
-[    0.484153] ACPI: PCI: Interrupt link LNKA configured for IRQ 10
-[    0.484595] ACPI: PCI: Interrupt link LNKB configured for IRQ 10
-[    0.486710] ACPI: PCI: Interrupt link LNKC configured for IRQ 11
-[    0.488589] ACPI: PCI: Interrupt link LNKD configured for IRQ 11
-[    0.489774] ACPI: PCI: Interrupt link LNKE configured for IRQ 10
-[    0.490992] ACPI: PCI: Interrupt link LNKF configured for IRQ 10
-[    0.492185] ACPI: PCI: Interrupt link LNKG configured for IRQ 11
-[    0.492628] ACPI: PCI: Interrupt link LNKH configured for IRQ 11
-[    0.493741] ACPI: PCI: Interrupt link GSIA configured for IRQ 16
-[    0.494838] ACPI: PCI: Interrupt link GSIB configured for IRQ 17
-[    0.496529] ACPI: PCI: Interrupt link GSIC configured for IRQ 18
-[    0.497673] ACPI: PCI: Interrupt link GSID configured for IRQ 19
-[    0.498797] ACPI: PCI: Interrupt link GSIE configured for IRQ 20
-[    0.499894] ACPI: PCI: Interrupt link GSIF configured for IRQ 21
-[    0.500528] ACPI: PCI: Interrupt link GSIG configured for IRQ 22
-[    0.501647] ACPI: PCI: Interrupt link GSIH configured for IRQ 23
-[    0.504638] iommu: Default domain type: Translated 
-[    0.505351] iommu: DMA domain TLB invalidation policy: lazy mode 
-[    0.506688] pps_core: LinuxPPS API ver. 1 registered
-[    0.508100] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
-[    0.508538] PTP clock support registered
-[    0.509572] NetLabel: Initializing
-[    0.510189] NetLabel:  domain hash size = 128
-[    0.512518] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
-[    0.514000] NetLabel:  unlabeled traffic allowed by default
-[    0.515220] PCI: Using ACPI for IRQ routing
-[    0.586630] pci 0000:00:01.0: vgaarb: setting as boot VGA device
-[    0.586630] pci 0000:00:01.0: vgaarb: bridge control possible
-[    0.586630] pci 0000:00:01.0: vgaarb: VGA device added: decodes=io+mem,owns=io+mem,locks=none
-[    0.588518] vgaarb: loaded
-[    0.589027] hpet: 3 channels of 0 reserved for per-cpu timers
-[    0.590008] hpet0: at MMIO 0xfed00000, IRQs 2, 8, 0
-[    0.592516] hpet0: 3 comparators, 64-bit 100.000000 MHz counter
-[    0.596586] clocksource: Switched to clocksource kvm-clock
-[    0.611068] VFS: Disk quotas dquot_6.6.0
-[    0.612631] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
-[    0.616043] AppArmor: AppArmor Filesystem Enabled
-[    0.617853] pnp: PnP ACPI init
-[    0.619374] system 00:05: [mem 0xb0000000-0xbfffffff window] has been reserved
-[    0.622568] pnp: PnP ACPI: found 6 devices
-[    0.632943] clocksource: acpi_pm: mask: 0xffffff max_cycles: 0xffffff, max_idle_ns: 2085701024 ns
-[    0.636431] NET: Registered PF_INET protocol family
-[    0.638381] IP idents hash table entries: 8192 (order: 4, 65536 bytes, linear)
-[    0.642611] tcp_listen_portaddr_hash hash table entries: 256 (order: 0, 4096 bytes, linear)
-[    0.645736] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
-[    0.648489] TCP established hash table entries: 4096 (order: 3, 32768 bytes, linear)
-[    0.651176] TCP bind hash table entries: 4096 (order: 5, 131072 bytes, linear)
-[    0.653453] TCP: Hash tables configured (established 4096 bind 4096)
-[    0.655443] MPTCP token hash table entries: 512 (order: 1, 12288 bytes, linear)
-[    0.657604] UDP hash table entries: 256 (order: 1, 8192 bytes, linear)
-[    0.659425] UDP-Lite hash table entries: 256 (order: 1, 8192 bytes, linear)
-[    0.661449] NET: Registered PF_UNIX/PF_LOCAL protocol family
-[    0.663013] NET: Registered PF_XDP protocol family
-[    0.664331] pci_bus 0000:00: resource 4 [io  0x0000-0x0cf7 window]
-[    0.665951] pci_bus 0000:00: resource 5 [io  0x0d00-0xffff window]
-[    0.667565] pci_bus 0000:00: resource 6 [mem 0x000a0000-0x000bffff window]
-[    0.669290] pci_bus 0000:00: resource 7 [mem 0x20000000-0xafffffff window]
-[    0.671024] pci_bus 0000:00: resource 8 [mem 0xc0000000-0xfebfffff window]
-[    0.672635] pci_bus 0000:00: resource 9 [mem 0x100000000-0x8ffffffff window]
-[    0.674347] PCI: CLS 0 bytes, default 64
-[    0.675245] clocksource: tsc: mask: 0xffffffffffffffff max_cycles: 0x229833f6470, max_idle_ns: 440795327230 ns
-[    0.675319] Trying to unpack rootfs image as initramfs...
-[    0.678573] Initialise system trusted keyrings
-[    0.679502] Key type blacklist registered
-[    0.680363] workingset: timestamp_bits=36 max_order=17 bucket_order=0
-[    0.683837] integrity: Platform Keyring initialized
-[    0.684846] integrity: Machine keyring initialized
-[    0.685814] Key type asymmetric registered
-[    0.686634] Asymmetric key parser 'x509' registered
-[    0.713481] Freeing initrd memory: 49528K
-[    0.716713] alg: self-tests for CTR-KDF (hmac(sha256)) passed
-[    0.718900] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 249)
-[    0.721750] io scheduler mq-deadline registered
-[    0.727248] Serial: 8250/16550 driver, 4 ports, IRQ sharing enabled
-[    0.729924] 00:03: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A
-[    0.734178] i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12
-[    0.738285] serio: i8042 KBD port at 0x60,0x64 irq 1
-[    0.739963] serio: i8042 AUX port at 0x60,0x64 irq 12
-[    0.741890] rtc_cmos 00:04: RTC can wake from S4
-[    0.744026] input: AT Translated Set 2 keyboard as /devices/platform/i8042/serio0/input/input0
-[    0.745235] rtc_cmos 00:04: registered as rtc0
-[    0.747633] rtc_cmos 00:04: setting system clock to 2024-05-09T18:56:27 UTC (1715280987)
-[    0.749030] rtc_cmos 00:04: alarms up to one day, y3k, 242 bytes nvram, hpet irqs
-[    0.750268] intel_pstate: CPU model not supported
-[    0.751149] ledtrig-cpu: registered to indicate activity on CPUs
-[    0.763265] NET: Registered PF_INET6 protocol family
-[    0.765515] Segment Routing with IPv6
-[    0.766156] In-situ OAM (IOAM) with IPv6
-[    0.766869] mip6: Mobile IPv6
-[    0.767413] NET: Registered PF_PACKET protocol family
-[    0.768499] IPI shorthand broadcast: enabled
-[    0.770191] sched_clock: Marking stable (653435107, 116657125)->(768596563, 1495669)
-[    0.773432] registered taskstats version 1
-[    0.774992] Loading compiled-in X.509 certificates
-[    0.811629] Loaded X.509 cert 'Debian Secure Boot CA: 6ccece7e4c6c0d1f6149f3dd27dfcc5cbb419ea1'
-[    0.813642] Loaded X.509 cert 'Debian Secure Boot Signer 2022 - linux: 14011249c2675ea8e5148542202005810584b25f'
-[    0.816183] Key type .fscrypt registered
-[    0.817788] Key type fscrypt-provisioning registered
-[    0.820704] Key type encrypted registered
-[    0.821586] AppArmor: AppArmor sha1 policy hashing enabled
-[    0.822757] ima: No TPM chip found, activating TPM-bypass!
-[    0.823931] ima: Allocated hash algorithm: sha256
-[    0.824978] ima: No architecture policies found
-[    0.825967] evm: Initialising EVM extended attributes:
-[    0.827055] evm: security.selinux
-[    0.827760] evm: security.SMACK64 (disabled)
-[    0.828669] evm: security.SMACK64EXEC (disabled)
-[    0.829644] evm: security.SMACK64TRANSMUTE (disabled)
-[    0.830704] evm: security.SMACK64MMAP (disabled)
-[    0.831680] evm: security.apparmor
-[    0.832394] evm: security.ima
-[    0.833037] evm: security.capability
-[    0.833765] evm: HMAC attrs: 0x1
-[    0.969705] Freeing unused decrypted memory: 2036K
-[    0.971966] Freeing unused kernel image (initmem) memory: 2584K
-[    0.996702] Write protecting the kernel read-only data: 24576k
-[    1.000839] Freeing unused kernel image (text/rodata gap) memory: 2040K
-[    1.003323] Freeing unused kernel image (rodata/data gap) memory: 1968K
-[    1.008993] x86/mm: Checked W+X mappings: passed, no W+X pages found.
-[    1.010659] x86/mm: Checking user space page tables
-[    1.012380] x86/mm: Checked W+X mappings: passed, no W+X pages found.
-[    1.014036] Run /init as init process
+[    0.001019] last_pfn = 0x1ffdf max_arch_pfn = 0x400000000
+[    0.001064] x86/PAT: Configuration [0-7]: WB  WC  UC- UC  WB  WP  UC- WT  
+[    0.001300] RAMDISK: [mem 0x1c7f8000-0x1ffcffff]
+[    0.001316] ACPI: Early table checksum verification disabled
+[    0.001320] ACPI: RSDP 0x00000000000F5260 000014 (v00 BOCHS )
+[    0.001325] ACPI: RSDT 0x000000001FFE2357 000038 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.001332] ACPI: FACP 0x000000001FFE2147 0000F4 (v03 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.001338] ACPI: DSDT 0x000000001FFE0040 002107 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.001343] ACPI: FACS 0x000000001FFE0000 000040
+[    0.001347] ACPI: APIC 0x000000001FFE223B 000080 (v03 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.001352] ACPI: HPET 0x000000001FFE22BB 000038 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.001356] ACPI: MCFG 0x000000001FFE22F3 00003C (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.001360] ACPI: WAET 0x000000001FFE232F 000028 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.001363] ACPI: Reserving FACP table memory at [mem 0x1ffe2147-0x1ffe223a]
+[    0.001365] ACPI: Reserving DSDT table memory at [mem 0x1ffe0040-0x1ffe2146]
+[    0.001366] ACPI: Reserving FACS table memory at [mem 0x1ffe0000-0x1ffe003f]
+[    0.001367] ACPI: Reserving APIC table memory at [mem 0x1ffe223b-0x1ffe22ba]
+[    0.001368] ACPI: Reserving HPET table memory at [mem 0x1ffe22bb-0x1ffe22f2]
+[    0.001368] ACPI: Reserving MCFG table memory at [mem 0x1ffe22f3-0x1ffe232e]
+[    0.001369] ACPI: Reserving WAET table memory at [mem 0x1ffe232f-0x1ffe2356]
+[    0.001426] No NUMA configuration found
+[    0.001427] Faking a node at [mem 0x0000000000000000-0x000000001ffdefff]
+[    0.001437] NODE_DATA(0) allocated [mem 0x1c7cd000-0x1c7f7fff]
+[    0.001713] Zone ranges:
+[    0.001713]   DMA      [mem 0x0000000000001000-0x0000000000ffffff]
+[    0.001716]   DMA32    [mem 0x0000000001000000-0x000000001ffdefff]
+[    0.001717]   Normal   empty
+[    0.001718]   Device   empty
+[    0.001719] Movable zone start for each node
+[    0.001722] Early memory node ranges
+[    0.001723]   node   0: [mem 0x0000000000001000-0x000000000009efff]
+[    0.001724]   node   0: [mem 0x0000000000100000-0x000000001ffdefff]
+[    0.001726] Initmem setup node 0 [mem 0x0000000000001000-0x000000001ffdefff]
+[    0.002115] On node 0, zone DMA: 1 pages in unavailable ranges
+[    0.002146] On node 0, zone DMA: 97 pages in unavailable ranges
+[    0.003348] On node 0, zone DMA32: 33 pages in unavailable ranges
+[    0.003734] ACPI: PM-Timer IO Port: 0x608
+[    0.003747] ACPI: LAPIC_NMI (acpi_id[0xff] dfl dfl lint[0x1])
+[    0.003750] ACPI: Skipping IOAPIC probe due to 'noapic' option.
+[    0.003752] ACPI: Using ACPI for processor (LAPIC) configuration information
+[    0.003753] ACPI: HPET id: 0x8086a201 base: 0xfed00000
+[    0.003757] smpboot: Allowing 2 CPUs, 0 hotplug CPUs
+[    0.003776] PM: hibernation: Registered nosave memory: [mem 0x00000000-0x00000fff]
+[    0.003778] PM: hibernation: Registered nosave memory: [mem 0x0009f000-0x0009ffff]
+[    0.003779] PM: hibernation: Registered nosave memory: [mem 0x000a0000-0x000effff]
+[    0.003780] PM: hibernation: Registered nosave memory: [mem 0x000f0000-0x000fffff]
+[    0.003781] [mem 0x20000000-0xafffffff] available for PCI devices
+[    0.003783] Booting paravirtualized kernel on KVM
+[    0.003784] clocksource: refined-jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645519600211568 ns
+[    0.008078] setup_percpu: NR_CPUS:8192 nr_cpumask_bits:2 nr_cpu_ids:2 nr_node_ids:1
+[    0.008601] percpu: Embedded 61 pages/cpu s212992 r8192 d28672 u1048576
+[    0.008635] kvm-guest: PV spinlocks disabled, no host support
+[    0.008637] Fallback order for Node 0: 0 
+[    0.008640] Built 1 zonelists, mobility grouping on.  Total pages: 128735
+[    0.008641] Policy zone: DMA32
+[    0.008642] Kernel command line: console=ttyS0 init.arg=--test-threads=1 noapic
+[    0.008759] Dentry cache hash table entries: 65536 (order: 7, 524288 bytes, linear)
+[    0.008798] Inode-cache hash table entries: 32768 (order: 6, 262144 bytes, linear)
+[    0.008851] mem auto-init: stack:all(zero), heap alloc:on, heap free:off
+[    0.010886] Memory: 223928K/523764K available (12295K kernel code, 2320K rwdata, 8272K rodata, 2584K init, 3488K bss, 104420K reserved, 0K cma-reserved)
+[    0.011171] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=2, Nodes=1
+[    0.011191] Kernel/User page tables isolation: enabled
+[    0.011220] ftrace: allocating 37357 entries in 146 pages
+[    0.017975] ftrace: allocated 146 pages with 3 groups
+[    0.018650] Dynamic Preempt: voluntary
+[    0.019057] rcu: Preemptible hierarchical RCU implementation.
+[    0.019058] rcu: 	RCU restricting CPUs from NR_CPUS=8192 to nr_cpu_ids=2.
+[    0.019060] 	Trampoline variant of Tasks RCU enabled.
+[    0.019061] 	Rude variant of Tasks RCU enabled.
+[    0.019061] 	Tracing variant of Tasks RCU enabled.
+[    0.019062] rcu: RCU calculated value of scheduler-enlistment delay is 25 jiffies.
+[    0.019063] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=2
+[    0.023739] NR_IRQS: 524544, nr_irqs: 48, preallocated irqs: 16
+[    0.023930] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.036371] Console: colour VGA+ 80x25
+[    0.135970] printk: console [ttyS0] enabled
+[    0.136685] ACPI: Core revision 20220331
+[    0.137388] ACPI: setting ELCR to 0200 (from 0c00)
+[    0.138294] clocksource: hpet: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604467 ns
+[    0.139874] APIC: Switch to symmetric I/O mode setup
+[    0.140721] Not enabling interrupt remapping due to skipped IO-APIC setup
+[    0.141859] clocksource: tsc-early: mask: 0xffffffffffffffff max_cycles: 0x229833f6470, max_idle_ns: 440795327230 ns
+[    0.143561] Calibrating delay loop (skipped) preset value.. 4799.99 BogoMIPS (lpj=9599984)
+[    0.147648] Last level iTLB entries: 4KB 0, 2MB 0, 4MB 0
+[    0.148509] Last level dTLB entries: 4KB 0, 2MB 0, 4MB 0, 1GB 0
+[    0.149463] Spectre V1 : Mitigation: usercopy/swapgs barriers and __user pointer sanitization
+[    0.151562] Spectre V2 : Mitigation: Retpolines
+[    0.152297] Spectre V2 : Spectre v2 / SpectreRSB mitigation: Filling RSB on context switch
+[    0.153638] Spectre V2 : Spectre v2 / SpectreRSB : Filling RSB on VMEXIT
+[    0.154718] Speculative Store Bypass: Vulnerable
+[    0.155564] MDS: Vulnerable: Clear CPU buffers attempted, no microcode
+[    0.156618] MMIO Stale Data: Unknown: No mitigations
+[    0.157418] x86/fpu: x87 FPU will use FXSAVE
+[    0.171147] Freeing SMP alternatives memory: 36K
+[    0.171562] pid_max: default: 32768 minimum: 301
+[    0.172374] LSM: Security Framework initializing
+[    0.173159] landlock: Up and running.
+[    0.173768] Yama: disabled by default; enable with sysctl kernel.yama.*
+[    0.174873] AppArmor: AppArmor initialized
+[    0.175562] TOMOYO Linux initialized
+[    0.176158] LSM support for eBPF active
+[    0.176831] Mount-cache hash table entries: 1024 (order: 1, 8192 bytes, linear)
+[    0.178026] Mountpoint-cache hash table entries: 1024 (order: 1, 8192 bytes, linear)
+[    0.288524] smpboot: CPU0: Intel QEMU Virtual CPU version 2.5+ (family: 0xf, model: 0x6b, stepping: 0x1)
+[    0.290228] cblist_init_generic: Setting adjustable number of callback queues.
+[    0.291418] cblist_init_generic: Setting shift to 1 and lim to 1.
+[    0.291558] cblist_init_generic: Setting adjustable number of callback queues.
+[    0.291559] cblist_init_generic: Setting shift to 1 and lim to 1.
+[    0.292580] cblist_init_generic: Setting adjustable number of callback queues.
+[    0.293769] cblist_init_generic: Setting shift to 1 and lim to 1.
+[    0.295579] Performance Events: unsupported Netburst CPU model 107 no PMU driver, software events only.
+[    0.297133] signal: max sigframe size: 1440
+[    0.297861] rcu: Hierarchical SRCU implementation.
+[    0.298652] rcu: 	Max phase no-delay instances is 1000.
+[    0.299811] NMI watchdog: Perf NMI watchdog permanently disabled
+[    0.300869] smp: Bringing up secondary CPUs ...
+[    0.301741] x86: Booting SMP configuration:
+[    0.302433] .... node  #0, CPUs:      #1
+[    0.315597] smp: Brought up 1 node, 2 CPUs
+[    0.316938] smpboot: Max logical packages: 1
+[    0.317645] smpboot: Total of 2 processors activated (9599.98 BogoMIPS)
+[    0.320513] node 0 deferred pages initialised in 4ms
+[    0.322405] devtmpfs: initialized
+[    0.323609] x86/mm: Memory block size: 128MB
+[    0.324517] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+[    0.325242] futex hash table entries: 512 (order: 3, 32768 bytes, linear)
+[    0.328254] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.329342] DMA: preallocated 128 KiB GFP_KERNEL pool for atomic allocations
+[    0.330536] DMA: preallocated 128 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.331960] DMA: preallocated 128 KiB GFP_KERNEL|GFP_DMA32 pool for atomic allocations
+[    0.333267] audit: initializing netlink subsys (disabled)
+[    0.334194] audit: type=2000 audit(1715354342.087:1): state=initialized audit_enabled=0 res=1
+[    0.334194] thermal_sys: Registered thermal governor 'fair_share'
+[    0.335567] thermal_sys: Registered thermal governor 'bang_bang'
+[    0.336577] thermal_sys: Registered thermal governor 'step_wise'
+[    0.337559] thermal_sys: Registered thermal governor 'user_space'
+[    0.339559] thermal_sys: Registered thermal governor 'power_allocator'
+[    0.340570] cpuidle: using governor ladder
+[    0.342321] cpuidle: using governor menu
+[    0.343647] acpiphp: ACPI Hot Plug PCI Controller Driver version: 0.5
+[    0.344810] PCI: MMCONFIG for domain 0000 [bus 00-ff] at [mem 0xb0000000-0xbfffffff] (base 0xb0000000)
+[    0.346335] PCI: MMCONFIG at [mem 0xb0000000-0xbfffffff] reserved in E820
+[    0.347574] PCI: Using configuration type 1 for base access
+[    0.349459] kprobes: kprobe jump-optimization is enabled. All kprobes are optimized if possible.
+[    0.363558] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.363564] HugeTLB: 28 KiB vmemmap can be freed for a 2.00 MiB page
+[    0.368340] ACPI: Added _OSI(Module Device)
+[    0.369841] ACPI: Added _OSI(Processor Device)
+[    0.371567] ACPI: Added _OSI(3.0 _SCP Extensions)
+[    0.373260] ACPI: Added _OSI(Processor Aggregator Device)
+[    0.377616] ACPI: 1 ACPI AML tables successfully acquired and loaded
+[    0.381718] ACPI: Interpreter enabled
+[    0.383600] ACPI: PM: (supports S0 S3 S4 S5)
+[    0.385219] ACPI: Using PIC for interrupt routing
+[    0.386931] PCI: Using host bridge windows from ACPI; if necessary, use "pci=nocrs" and report a bug
+[    0.387561] PCI: Using E820 reservations for host bridge windows
+[    0.391756] ACPI: Enabled 2 GPEs in block 00 to 3F
+[    0.396827] ACPI: PCI Root Bridge [PCI0] (domain 0000 [bus 00-ff])
+[    0.398617] acpi PNP0A08:00: _OSC: OS supports [ExtendedConfig ASPM ClockPM Segments MSI HPX-Type3]
+[    0.399662] acpi PNP0A08:00: _OSC: platform does not support [PCIeHotplug LTR]
+[    0.401684] acpi PNP0A08:00: _OSC: OS now controls [PME AER PCIeCapability]
+[    0.403798] PCI host bridge to bus 0000:00
+[    0.404889] pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7 window]
+[    0.407563] pci_bus 0000:00: root bus resource [io  0x0d00-0xffff window]
+[    0.409275] pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff window]
+[    0.411562] pci_bus 0000:00: root bus resource [mem 0x20000000-0xafffffff window]
+[    0.413237] pci_bus 0000:00: root bus resource [mem 0xc0000000-0xfebfffff window]
+[    0.414897] pci_bus 0000:00: root bus resource [mem 0x100000000-0x8ffffffff window]
+[    0.415562] pci_bus 0000:00: root bus resource [bus 00-ff]
+[    0.416880] pci 0000:00:00.0: [8086:29c0] type 00 class 0x060000
+[    0.419815] pci 0000:00:01.0: [1234:1111] type 00 class 0x030000
+[    0.423295] pci 0000:00:01.0: reg 0x10: [mem 0xfd000000-0xfdffffff pref]
+[    0.427584] pci 0000:00:01.0: reg 0x18: [mem 0xfebd4000-0xfebd4fff]
+[    0.434669] pci 0000:00:01.0: reg 0x30: [mem 0xfebc0000-0xfebcffff pref]
+[    0.435716] pci 0000:00:01.0: Video device with shadowed ROM at [mem 0x000c0000-0x000dffff]
+[    0.437831] pci 0000:00:02.0: [8086:10d3] type 00 class 0x020000
+[    0.440808] pci 0000:00:02.0: reg 0x10: [mem 0xfeb80000-0xfeb9ffff]
+[    0.444837] pci 0000:00:02.0: reg 0x14: [mem 0xfeba0000-0xfebbffff]
+[    0.447561] pci 0000:00:02.0: reg 0x18: [io  0xc040-0xc05f]
+[    0.449765] pci 0000:00:02.0: reg 0x1c: [mem 0xfebd0000-0xfebd3fff]
+[    0.457038] pci 0000:00:02.0: reg 0x30: [mem 0xfeb40000-0xfeb7ffff pref]
+[    0.459995] pci 0000:00:1f.0: [8086:2918] type 00 class 0x060100
+[    0.461748] pci 0000:00:1f.0: quirk: [io  0x0600-0x067f] claimed by ICH6 ACPI/GPIO/TCO
+[    0.463608] pci 0000:00:1f.2: [8086:2922] type 00 class 0x010601
+[    0.468082] pci 0000:00:1f.2: reg 0x20: [io  0xc060-0xc07f]
+[    0.469888] pci 0000:00:1f.2: reg 0x24: [mem 0xfebd5000-0xfebd5fff]
+[    0.472286] pci 0000:00:1f.3: [8086:2930] type 00 class 0x0c0500
+[    0.475237] pci 0000:00:1f.3: reg 0x20: [io  0x0700-0x073f]
+[    0.478188] ACPI: PCI: Interrupt link LNKA configured for IRQ 10
+[    0.479671] ACPI: PCI: Interrupt link LNKB configured for IRQ 10
+[    0.480823] ACPI: PCI: Interrupt link LNKC configured for IRQ 11
+[    0.481971] ACPI: PCI: Interrupt link LNKD configured for IRQ 11
+[    0.483601] ACPI: PCI: Interrupt link LNKE configured for IRQ 10
+[    0.484750] ACPI: PCI: Interrupt link LNKF configured for IRQ 10
+[    0.485900] ACPI: PCI: Interrupt link LNKG configured for IRQ 11
+[    0.487053] ACPI: PCI: Interrupt link LNKH configured for IRQ 11
+[    0.487608] ACPI: PCI: Interrupt link GSIA configured for IRQ 16
+[    0.488672] ACPI: PCI: Interrupt link GSIB configured for IRQ 17
+[    0.489747] ACPI: PCI: Interrupt link GSIC configured for IRQ 18
+[    0.490816] ACPI: PCI: Interrupt link GSID configured for IRQ 19
+[    0.491572] ACPI: PCI: Interrupt link GSIE configured for IRQ 20
+[    0.492657] ACPI: PCI: Interrupt link GSIF configured for IRQ 21
+[    0.493725] ACPI: PCI: Interrupt link GSIG configured for IRQ 22
+[    0.495576] ACPI: PCI: Interrupt link GSIH configured for IRQ 23
+[    0.497083] iommu: Default domain type: Translated 
+[    0.497083] iommu: DMA domain TLB invalidation policy: lazy mode 
+[    0.499713] pps_core: LinuxPPS API ver. 1 registered
+[    0.500823] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.502805] PTP clock support registered
+[    0.503949] NetLabel: Initializing
+[    0.504728] NetLabel:  domain hash size = 128
+[    0.505691] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    0.507593] NetLabel:  unlabeled traffic allowed by default
+[    0.508834] PCI: Using ACPI for IRQ routing
+[    0.586842] pci 0000:00:01.0: vgaarb: setting as boot VGA device
+[    0.586842] pci 0000:00:01.0: vgaarb: bridge control possible
+[    0.586842] pci 0000:00:01.0: vgaarb: VGA device added: decodes=io+mem,owns=io+mem,locks=none
+[    0.587561] vgaarb: loaded
+[    0.588062] hpet: 3 channels of 0 reserved for per-cpu timers
+[    0.591581] hpet0: at MMIO 0xfed00000, IRQs 2, 8, 0
+[    0.592384] hpet0: 3 comparators, 64-bit 100.000000 MHz counter
+[    0.597744] clocksource: Switched to clocksource kvm-clock
+[    0.598860] VFS: Disk quotas dquot_6.6.0
+[    0.599532] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.599532] AppArmor: AppArmor Filesystem Enabled
+[    0.599633] pnp: PnP ACPI init
+[    0.600326] system 00:05: [mem 0xb0000000-0xbfffffff window] has been reserved
+[    0.601744] pnp: PnP ACPI: found 6 devices
+[    0.608428] clocksource: acpi_pm: mask: 0xffffff max_cycles: 0xffffff, max_idle_ns: 2085701024 ns
+[    0.610084] NET: Registered PF_INET protocol family
+[    0.610975] IP idents hash table entries: 8192 (order: 4, 65536 bytes, linear)
+[    0.613204] tcp_listen_portaddr_hash hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.614608] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.615881] TCP established hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[    0.617158] TCP bind hash table entries: 4096 (order: 5, 131072 bytes, linear)
+[    0.618347] TCP: Hash tables configured (established 4096 bind 4096)
+[    0.619456] MPTCP token hash table entries: 512 (order: 1, 12288 bytes, linear)
+[    0.620722] UDP hash table entries: 256 (order: 1, 8192 bytes, linear)
+[    0.621805] UDP-Lite hash table entries: 256 (order: 1, 8192 bytes, linear)
+[    0.622988] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.623946] NET: Registered PF_XDP protocol family
+[    0.624762] pci_bus 0000:00: resource 4 [io  0x0000-0x0cf7 window]
+[    0.625785] pci_bus 0000:00: resource 5 [io  0x0d00-0xffff window]
+[    0.626794] pci_bus 0000:00: resource 6 [mem 0x000a0000-0x000bffff window]
+[    0.627926] pci_bus 0000:00: resource 7 [mem 0x20000000-0xafffffff window]
+[    0.629049] pci_bus 0000:00: resource 8 [mem 0xc0000000-0xfebfffff window]
+[    0.630168] pci_bus 0000:00: resource 9 [mem 0x100000000-0x8ffffffff window]
+[    0.631402] PCI: CLS 0 bytes, default 64
+[    0.632098] clocksource: tsc: mask: 0xffffffffffffffff max_cycles: 0x229833f6470, max_idle_ns: 440795327230 ns
+[    0.632316] Trying to unpack rootfs image as initramfs...
+[    0.634850] Initialise system trusted keyrings
+[    0.637470] Key type blacklist registered
+[    0.638215] workingset: timestamp_bits=36 max_order=17 bucket_order=0
+[    0.641661] integrity: Platform Keyring initialized
+[    0.642503] integrity: Machine keyring initialized
+[    0.643320] Key type asymmetric registered
+[    0.644041] Asymmetric key parser 'x509' registered
+[    0.694765] Freeing initrd memory: 57184K
+[    0.697204] alg: self-tests for CTR-KDF (hmac(sha256)) passed
+[    0.698792] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 249)
+[    0.700862] io scheduler mq-deadline registered
+[    0.705472] Serial: 8250/16550 driver, 4 ports, IRQ sharing enabled
+[    0.707763] 00:03: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A
+[    0.711349] i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12
+[    0.714760] serio: i8042 KBD port at 0x60,0x64 irq 1
+[    0.716171] serio: i8042 AUX port at 0x60,0x64 irq 12
+[    0.718219] input: AT Translated Set 2 keyboard as /devices/platform/i8042/serio0/input/input0
+[    0.719703] rtc_cmos 00:04: RTC can wake from S4
+[    0.723341] rtc_cmos 00:04: registered as rtc0
+[    0.725331] rtc_cmos 00:04: setting system clock to 2024-05-10T15:19:01 UTC (1715354341)
+[    0.728583] rtc_cmos 00:04: alarms up to one day, y3k, 242 bytes nvram, hpet irqs
+[    0.731326] intel_pstate: CPU model not supported
+[    0.733164] ledtrig-cpu: registered to indicate activity on CPUs
+[    0.753699] NET: Registered PF_INET6 protocol family
+[    0.756900] Segment Routing with IPv6
+[    0.757883] In-situ OAM (IOAM) with IPv6
+[    0.759000] mip6: Mobile IPv6
+[    0.759832] NET: Registered PF_PACKET protocol family
+[    0.761319] IPI shorthand broadcast: enabled
+[    0.762882] sched_clock: Marking stable (645622651, 115621447)->(760939391, 304707)
+[    0.765877] registered taskstats version 1
+[    0.767329] Loading compiled-in X.509 certificates
+[    0.799409] Loaded X.509 cert 'Debian Secure Boot CA: 6ccece7e4c6c0d1f6149f3dd27dfcc5cbb419ea1'
+[    0.801384] Loaded X.509 cert 'Debian Secure Boot Signer 2022 - linux: 14011249c2675ea8e5148542202005810584b25f'
+[    0.803760] Key type .fscrypt registered
+[    0.805188] Key type fscrypt-provisioning registered
+[    0.807874] Key type encrypted registered
+[    0.808706] AppArmor: AppArmor sha1 policy hashing enabled
+[    0.809863] ima: No TPM chip found, activating TPM-bypass!
+[    0.810993] ima: Allocated hash algorithm: sha256
+[    0.812015] ima: No architecture policies found
+[    0.812974] evm: Initialising EVM extended attributes:
+[    0.814040] evm: security.selinux
+[    0.814742] evm: security.SMACK64 (disabled)
+[    0.815649] evm: security.SMACK64EXEC (disabled)
+[    0.816603] evm: security.SMACK64TRANSMUTE (disabled)
+[    0.817653] evm: security.SMACK64MMAP (disabled)
+[    0.818608] evm: security.apparmor
+[    0.819320] evm: security.ima
+[    0.819965] evm: security.capability
+[    0.820716] evm: HMAC attrs: 0x1
+[    0.959006] Freeing unused decrypted memory: 2036K
+[    0.961440] Freeing unused kernel image (initmem) memory: 2584K
+[    0.983676] Write protecting the kernel read-only data: 24576k
+[    0.988184] Freeing unused kernel image (text/rodata gap) memory: 2040K
+[    0.990960] Freeing unused kernel image (rodata/data gap) memory: 1968K
+[    0.996858] x86/mm: Checked W+X mappings: passed, no W+X pages found.
+[    0.998672] x86/mm: Checking user space page tables
+[    1.000595] x86/mm: Checked W+X mappings: passed, no W+X pages found.
+[    1.002382] Run /init as init process
+Binary: DirEntry("/bin/release-integration_test")
+Is it a directory? false
+Is it a file? true
+File size: 4006576
+Last modified: SystemTime { tv_sec: 1715354341, tv_nsec: 0 }
+Permissions: Permissions(FilePermissions { mode: 0o100755 (-rwxr-xr-x) })
+File_type: FileType { is_file: true, is_dir: false, is_symlink: false, .. }
+Path: "/bin/release-integration_test"
+Name: "release-integration_test"
+
+Binary: DirEntry("/bin/dev-integration_test")
+Is it a directory? false
+Is it a file? true
+File size: 50423736
+Last modified: SystemTime { tv_sec: 1715354341, tv_nsec: 0 }
+Permissions: Permissions(FilePermissions { mode: 0o100755 (-rwxr-xr-x) })
+File_type: FileType { is_file: true, is_dir: false, is_symlink: false, .. }
+Path: "/bin/dev-integration_test"
+Name: "dev-integration_test"
+
+Binary: DirEntry("/bin/check-config.sh")
+Is it a directory? false
+Is it a file? true
+File size: 11814
+Last modified: SystemTime { tv_sec: 1715354341, tv_nsec: 0 }
+Permissions: Permissions(FilePermissions { mode: 0o100755 (-rwxr-xr-x) })
+File_type: FileType { is_file: true, is_dir: false, is_symlink: false, .. }
+Path: "/bin/check-config.sh"
+Name: "check-config.sh"
+
+Binary: DirEntry("/bin/tree")
+Is it a directory? false
+Is it a file? true
+File size: 87608
+Last modified: SystemTime { tv_sec: 1689984000, tv_nsec: 0 }
+Permissions: Permissions(FilePermissions { mode: 0o100755 (-rwxr-xr-x) })
+File_type: FileType { is_file: true, is_dir: false, is_symlink: false, .. }
+Path: "/bin/tree"
+Name: "tree"
+
 failed to execute /bin/tree
 
 Caused by:
     No such file or directory (os error 2)
 init: failure
-[    1.020526] ACPI: PM: Preparing to enter system sleep state S5
-[    1.022152] reboot: Power down
+[    1.039151] ACPI: PM: Preparing to enter system sleep state S5
+[    1.040473] reboot: Power down
 Error: VM binaries failed on test/.tmp/boot/vmlinuz-6.1.0-15-cloud-amd64
