@@ -183,8 +183,8 @@ pub type __s16 = ::core::ffi::c_short;
 pub type __u16 = ::core::ffi::c_ushort;
 pub type __s32 = ::core::ffi::c_int;
 pub type __u32 = ::core::ffi::c_uint;
-pub type __s64 = ::core::ffi::c_longlong;
-pub type __u64 = ::core::ffi::c_ulonglong;
+pub type __s64 = ::core::ffi::c_long;
+pub type __u64 = ::core::ffi::c_ulong;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct bpf_insn {
@@ -913,7 +913,7 @@ pub type _bindgen_ty_13 = ::core::ffi::c_uint;
 pub const BPF_F_INDEX_MASK: _bindgen_ty_14 = 4294967295;
 pub const BPF_F_CURRENT_CPU: _bindgen_ty_14 = 4294967295;
 pub const BPF_F_CTXLEN_MASK: _bindgen_ty_14 = 4503595332403200;
-pub type _bindgen_ty_14 = ::core::ffi::c_ulonglong;
+pub type _bindgen_ty_14 = ::core::ffi::c_ulong;
 pub const BPF_F_CURRENT_NETNS: _bindgen_ty_15 = -1;
 pub type _bindgen_ty_15 = ::core::ffi::c_int;
 pub const BPF_F_ADJ_ROOM_FIXED_GSO: _bindgen_ty_17 = 1;
@@ -2422,6 +2422,6 @@ pub const TCA_DUMP_FLAGS: _bindgen_ty_172 = 15;
 pub const TCA_EXT_WARN_MSG: _bindgen_ty_172 = 16;
 pub const __TCA_MAX: _bindgen_ty_172 = 17;
 pub type _bindgen_ty_172 = ::core::ffi::c_uint;
-pub const AYA_PERF_EVENT_IOC_ENABLE: ::core::ffi::c_int = 9216;
-pub const AYA_PERF_EVENT_IOC_DISABLE: ::core::ffi::c_int = 9217;
-pub const AYA_PERF_EVENT_IOC_SET_BPF: ::core::ffi::c_int = 1074013192;
+pub const AYA_PERF_EVENT_IOC_ENABLE: ::core::ffi::c_int = 536880128;
+pub const AYA_PERF_EVENT_IOC_DISABLE: ::core::ffi::c_int = 536880129;
+pub const AYA_PERF_EVENT_IOC_SET_BPF: ::core::ffi::c_int = -2147212280;
