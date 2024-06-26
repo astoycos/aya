@@ -6733,6 +6733,7 @@ pub const aya_obj::generated::TCA_CHAIN: aya_obj::generated::_bindgen_ty_172
 pub const aya_obj::generated::TCA_DUMP_FLAGS: aya_obj::generated::_bindgen_ty_172
 pub const aya_obj::generated::TCA_DUMP_INVISIBLE: aya_obj::generated::_bindgen_ty_172
 pub const aya_obj::generated::TCA_EGRESS_BLOCK: aya_obj::generated::_bindgen_ty_172
+pub const aya_obj::generated::TCA_EXT_WARN_MSG: aya_obj::generated::_bindgen_ty_172
 pub const aya_obj::generated::TCA_FCNT: aya_obj::generated::_bindgen_ty_172
 pub const aya_obj::generated::TCA_HW_OFFLOAD: aya_obj::generated::_bindgen_ty_172
 pub const aya_obj::generated::TCA_INGRESS_BLOCK: aya_obj::generated::_bindgen_ty_172
