@@ -145,27 +145,43 @@ impl PerfBuffer {
         &mut self,
         buffers: &mut [BytesMut],
     ) -> Result<Events, PerfBufferError> {
+        println!("BILLY: Enter - read_events()");
         if buffers.is_empty() {
+            println!("BILLY: Exit - read_events() - No Buffers");
             return Err(PerfBufferError::NoBuffers);
         }
+        println!("BILLY: Pre - read_events() - load()");
         let header = self.buf.load(Ordering::SeqCst);
+        println!("BILLY: Pre - read_events() - base set");
         let base = header as usize + self.page_size;
 
+        println!("BILLY: Pre - read_events() - pre Events");
         let mut events = Events { read: 0, lost: 0 };
         let mut buf_n = 0;
 
+        println!("BILLY: Pre - read_events() - pre fill_buf");
         let fill_buf = |start_off, base, mmap_size, out_buf: &mut [u8]| {
+            println!("BILLY: Pre - read_events() - pre out_buf.len()");
             let len = out_buf.len();
 
+            println!("BILLY: Pre - read_events() - pre end");
             let end = (start_off + len) % mmap_size;
+            println!("BILLY: Pre - read_events() - pre start");
             let start = start_off % mmap_size;
 
             if start < end {
+                println!("BILLY: Pre - read_events() - pre copy_from_slice()");
                 out_buf.copy_from_slice(unsafe {
                     slice::from_raw_parts((base + start) as *const u8, len)
                 });
             } else {
+                println!("BILLY: Pre - read_events() - pre size");
                 let size = mmap_size - start;
+                println!("BILLY: Pre - read_events() - pre from_raw_parts()");
+                println!(
+                    "BILLY: mmap_size={} start={} size={} len={}",
+                    mmap_size, start, size, len
+                );
                 unsafe {
                     out_buf[..size]
                         .copy_from_slice(slice::from_raw_parts((base + start) as *const u8, size));
@@ -175,68 +191,96 @@ impl PerfBuffer {
             }
         };
 
+        println!("BILLY: Pre - read_events() - pre read_event");
         let read_event = |event_start, event_type, base, buf: &mut BytesMut| {
+            println!("BILLY: Pre - read_events() - pre sample_size");
             let sample_size = match event_type {
                 x if x == PERF_RECORD_SAMPLE as u32 || x == PERF_RECORD_LOST as u32 => {
+                    println!("BILLY: Pre - read_events() - match x");
                     let mut size = [0u8; mem::size_of::<u32>()];
+                    println!("BILLY: Pre - read_events() - fill_buf");
                     fill_buf(
                         event_start + mem::size_of::<perf_event_header>(),
                         base,
                         self.size,
                         &mut size,
                     );
+                    println!("BILLY: Pre - read_events() - BEFORE from_ne_bytes");
                     u32::from_ne_bytes(size)
                 }
-                _ => return Ok(None),
+                _ => {
+                    println!("BILLY: Pre - read_events() - match None - return OK");
+                    return Ok(None);
+                }
             } as usize;
 
+            println!("BILLY: Pre - read_events() - pre sample_start");
             let sample_start =
                 (event_start + mem::size_of::<perf_event_header>() + mem::size_of::<u32>())
                     % self.size;
 
+            println!("BILLY: Pre - read_events() - pre event_type");
             match event_type {
                 x if x == PERF_RECORD_SAMPLE as u32 => {
+                    println!("BILLY: Pre - read_events() - match x on PERF_RECORD_SAMPLE");
                     buf.clear();
+                    println!("BILLY: Pre - read_events() - pre reserve()");
                     buf.reserve(sample_size);
+                    println!("BILLY: Pre - read_events() - pre unsafe set_len()");
                     unsafe { buf.set_len(sample_size) };
 
+                    println!("BILLY: Pre - read_events() - pre fill_buf() on PERF_RECORD_SAMPLE");
                     fill_buf(sample_start, base, self.size, buf);
 
+                    println!("BILLY: Pre - read_events() - PERF_RECORD_SAMPLE - return OK");
                     Ok(Some((1, 0)))
                 }
                 x if x == PERF_RECORD_LOST as u32 => {
+                    println!("BILLY: Pre - read_events() - match x on PERF_RECORD_LOST");
                     let mut count = [0u8; mem::size_of::<u64>()];
+                    println!("BILLY: Pre - read_events() -fill_buf() on PERF_RECORD_LOST");
                     fill_buf(
                         event_start + mem::size_of::<perf_event_header>() + mem::size_of::<u64>(),
                         base,
                         self.size,
                         &mut count,
                     );
+                    println!("BILLY: Pre - read_events() - PERF_RECORD_SAMPLE - return OK but  u64::from_ne_bytes(count)");
                     Ok(Some((0, u64::from_ne_bytes(count) as usize)))
                 }
                 _ => Ok(None),
             }
         };
 
+        println!("BILLY: Pre - read_events() - pre unsafe head");
         let head = unsafe { (*header).data_head } as usize;
+        println!("BILLY: Pre - read_events() - pre unsafe tail");
         let mut tail = unsafe { (*header).data_tail } as usize;
+        println!("BILLY: Pre - read_events() - pre loop");
         let result = loop {
             if head == tail {
+                println!("BILLY: Pre - read_events() - head==tail OK");
                 break Ok(());
             }
             if buf_n == buffers.len() {
+                println!("BILLY: Pre - read_events() - buf_n==len() OK");
                 break Ok(());
             }
 
             let buf = &mut buffers[buf_n];
 
+            println!("BILLY: Pre - read_events() - pre event_start");
             let event_start = tail % self.size;
+            println!("BILLY: Pre - read_events() - pre unsafe event");
             let event =
                 unsafe { ptr::read_unaligned((base + event_start) as *const perf_event_header) };
+            println!("BILLY: Pre - read_events() - pre event_size");
             let event_size = event.size as usize;
 
+            println!("BILLY: Pre - read_events() - pre read_event()");
             match read_event(event_start, event.type_, base, buf) {
                 Ok(Some((read, lost))) => {
+                    println!("BILLY: Pre - read_events() - read_event() OK");
                     if read > 0 {
                         buf_n += 1;
                         events.read += read;
@@ -247,15 +291,18 @@ impl PerfBuffer {
                 Err(e) => {
                     // we got an error and we didn't process any events, propagate the error
                     // and give the caller a chance to increase buffers
+                    println!("BILLY: Pre - read_events() - read_event() ERROR");
                     break Err(e);
                 }
             }
             tail += event_size;
         };
 
+        println!("BILLY: Pre - read_events() - unsafe data_tail update");
         atomic::fence(Ordering::SeqCst);
         unsafe { (*header).data_tail = tail as u64 };
 
+        println!("BILLY: Exit - read_events() - Done");
         result.map(|()| events)
     }
 }
@@ -533,27 +580,38 @@ mod tests {
         ignore = "`ptr::write_unaligned(dst, value)` is attempting a write access but no exposed tags have suitable permission in the borrow stack for this location"
     )]
     fn test_read_wrapping_sample_size() {
+        println!("BILLY: Enter - test_read_wrapping_sample_size()");
         let mut mmapped_buf = MMappedBuf {
             data: [0; PAGE_SIZE * 2],
         };
+        println!("BILLY: Pre - fake_mmap()");
         fake_mmap(&mmapped_buf);
+        println!("BILLY: Pre - open()");
         let mut buf = PerfBuffer::open(1, PAGE_SIZE, 1).unwrap();
 
+        println!("BILLY: Pre - perf_event_header");
         let header = perf_event_header {
             type_: PERF_RECORD_SAMPLE as u32,
             misc: 0,
             size: mem::size_of::<PerfSample<u64>>() as u16,
         };
 
+        println!("BILLY: Pre - offset");
         let offset = PAGE_SIZE - mem::size_of::<perf_event_header>() - 2;
         mmapped_buf.mmap_page.data_tail = offset as u64;
+        println!("BILLY: Pre - write1");
         write(&mut mmapped_buf, offset, header);
+        println!("BILLY: Pre - write2");
         write(&mut mmapped_buf, PAGE_SIZE - 2, 0x0004u16);
+        println!("BILLY: Pre - write3");
         write(&mut mmapped_buf, 0, 0x0000u16);
+        println!("BILLY: Pre - write4");
         write(&mut mmapped_buf, 2, 0xBAADCAFEu32);
 
+        println!("BILLY: Pre - with_capacity");
         let mut out_bufs = [BytesMut::with_capacity(8)];
 
+        println!("BILLY: Pre - read_events");
         let events = buf.read_events(&mut out_bufs).unwrap();
         assert_eq!(events, Events { lost: 0, read: 1 });
         assert_eq!(u32_from_buf(&out_bufs[0]), 0xBAADCAFE);
